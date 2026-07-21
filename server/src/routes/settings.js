@@ -22,7 +22,8 @@ router.get('/theme', async (req, res) => {
 router.put('/theme', protect, admin, async (req, res) => {
   try {
     const { theme } = req.body;
-    const allowed = ['default', 'midnight', 'minimal', 'forest', 'royal', 'marketplace', 'elegantBayt'];
+    // Must stay in sync with the keys in client/src/layouts/store/themes.js
+    const allowed = ['default', 'midnight', 'minimal', 'forest', 'royal', 'marketplace', 'elegantBayt', 'blanc', 'jokerPerfumes'];
     if (!allowed.includes(theme)) {
       return res.status(400).json({ message: 'Invalid theme' });
     }

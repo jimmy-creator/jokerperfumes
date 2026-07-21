@@ -29,7 +29,10 @@ import { cn } from '@/lib/utils';
 const STORE_NAME = import.meta.env.VITE_STORE_NAME || 'Elegant Bayt';
 
 // Shared style for the desktop top-nav links (uppercase, bold, spaced).
-const navLinkCls = 'text-[13px] font-semibold uppercase tracking-wide text-foreground/75 transition-colors hover:text-foreground';
+const navLinkCls = 'font-serif text-base uppercase tracking-[0.15em] text-foreground transition-colors hover:text-[color:var(--copper)]';
+// Applied on top of navLinkCls for the current page. `cn()` runs tailwind-merge,
+// so this text-* wins over the base `text-foreground` regardless of CSS order.
+const navLinkActiveCls = 'text-[color:var(--copper)]';
 
 export default function Navbar() {
   const { t } = useTranslation();
@@ -38,6 +41,13 @@ export default function Navbar() {
   const { wishlistCount } = useWishlist();
   const location = useLocation();
   const navigate = useNavigate();
+
+  // Routes are mounted twice — bare paths are English, /ar/* is Arabic — so
+  // strip the locale prefix before deciding which nav item is current.
+  const path = location.pathname.replace(/^\/ar(?=\/|$)/, '') || '/';
+  const isActive = (to) => (to === '/' ? path === '/' : path.startsWith(to));
+  // The Products trigger covers both the listing and individual product pages.
+  const productsActive = path.startsWith('/products') || path.startsWith('/product/');
 
   const [categories, setCategories] = useState([]);
   const [activeCat, setActiveCat] = useState('All Categories');
@@ -114,7 +124,9 @@ export default function Navbar() {
     }
   };
 
-  const isAccount = ['/profile', '/login', '/orders', '/admin'].includes(location.pathname);
+  // Uses the locale-stripped `path` so these stay lit on the /ar/* routes too.
+  const isAccount = ['/profile', '/login', '/orders', '/admin'].includes(path);
+  const isCart = path === '/cart' || path === '/checkout';
 
   // Clicking Home (or the logo) while already on the home page is a no-op
   // navigation — scroll to top instead. Route changes already scroll via App.jsx.
@@ -245,26 +257,34 @@ export default function Navbar() {
             <Menu className="size-5" />
           </Button>
 
-          {/* Logo */}
-          <Link to="/" onClick={scrollTopIfHome} className="flex shrink-0 items-center gap-2.5">
-            <img src="/images/elegant-bayt-monogram.png" alt={STORE_NAME} className="h-9 w-auto sm:h-10" />
-            <span className="hidden leading-none sm:flex sm:flex-col">
-              <span className="font-serif text-lg font-extrabold tracking-[0.14em] text-foreground lg:text-xl">
-                ELEGANT <span style={{ color: 'var(--gold)' }}>BAYT</span>
-              </span>
-              <span className="mt-1 text-[9px] font-medium uppercase tracking-[0.28em] text-muted-foreground">
-                {t('brand.tagline')}
-              </span>
-            </span>
+          {/* Logo — the ornate JOKER emblem carries the wordmark itself */}
+          <Link to="/" onClick={scrollTopIfHome} className="flex shrink-0 items-center">
+            <img
+              src="/images/joker/logo-header.webp"
+              alt={STORE_NAME}
+              className="h-9 w-auto sm:h-11"
+              fetchPriority="high"
+            />
           </Link>
 
           {/* Desktop nav links */}
           <div className="ml-6 hidden items-center gap-6 md:flex lg:ml-8 lg:gap-8">
-            <Link to="/" onClick={scrollTopIfHome} className={navLinkCls}>{t('common.home')}</Link>
+            <Link
+              to="/"
+              onClick={scrollTopIfHome}
+              aria-current={isActive('/') ? 'page' : undefined}
+              className={cn(navLinkCls, isActive('/') && navLinkActiveCls)}
+            >
+              {t('common.home')}
+            </Link>
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button type="button" className={cn(navLinkCls, 'inline-flex items-center gap-1')}>
+                <button
+                  type="button"
+                  aria-current={productsActive ? 'page' : undefined}
+                  className={cn(navLinkCls, 'inline-flex items-center gap-1', productsActive && navLinkActiveCls)}
+                >
                   {t('common.products')} <ChevronDown className="size-3.5 opacity-70" />
                 </button>
               </DropdownMenuTrigger>
@@ -280,8 +300,20 @@ export default function Navbar() {
               </DropdownMenuContent>
             </DropdownMenu>
 
-            <Link to="/about" className={navLinkCls}>{t('common.aboutUs')}</Link>
-            <Link to="/contact" className={navLinkCls}>{t('common.contact')}</Link>
+            <Link
+              to="/about"
+              aria-current={isActive('/about') ? 'page' : undefined}
+              className={cn(navLinkCls, isActive('/about') && navLinkActiveCls)}
+            >
+              {t('common.aboutUs')}
+            </Link>
+            <Link
+              to="/contact"
+              aria-current={isActive('/contact') ? 'page' : undefined}
+              className={cn(navLinkCls, isActive('/contact') && navLinkActiveCls)}
+            >
+              {t('common.contact')}
+            </Link>
           </div>
 
           {/* Actions */}
@@ -309,8 +341,14 @@ export default function Navbar() {
                 <User className="size-5" />
               </Link>
             </Button>
-            <Button asChild variant="ghost" size="icon" className="relative" aria-label="Cart">
-              <Link to="/cart">
+            <Button
+              asChild
+              variant="ghost"
+              size="icon"
+              className={cn('relative', isCart && 'text-primary')}
+              aria-label="Cart"
+            >
+              <Link to="/cart" aria-current={isCart ? 'page' : undefined}>
                 <ShoppingBag className="size-5" />
                 <CartBadge />
               </Link>
@@ -344,7 +382,11 @@ export default function Navbar() {
                 key={to + label}
                 to={to}
                 onClick={() => setShowMobileMenu(false)}
-                className="flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-accent"
+                aria-current={isActive(to) ? 'page' : undefined}
+                className={cn(
+                  'flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-accent',
+                  isActive(to) && navLinkActiveCls,
+                )}
               >
                 <Icon className="size-[18px]" />
                 <span className="flex-1">{label}</span>
@@ -359,8 +401,8 @@ export default function Navbar() {
           <div className="border-t border-border p-2">
             <div className="px-3 py-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t('common.explore')}</div>
             <div className="flex flex-col">
-              <Link to="/about" onClick={() => setShowMobileMenu(false)} className="rounded-md px-3 py-2 text-sm text-foreground transition-colors hover:bg-accent">{t('common.aboutUs')}</Link>
-              <Link to="/contact" onClick={() => setShowMobileMenu(false)} className="rounded-md px-3 py-2 text-sm text-foreground transition-colors hover:bg-accent">{t('common.contact')}</Link>
+              <Link to="/about" onClick={() => setShowMobileMenu(false)} aria-current={isActive('/about') ? 'page' : undefined} className={cn('rounded-md px-3 py-2 text-sm text-foreground transition-colors hover:bg-accent', isActive('/about') && navLinkActiveCls)}>{t('common.aboutUs')}</Link>
+              <Link to="/contact" onClick={() => setShowMobileMenu(false)} aria-current={isActive('/contact') ? 'page' : undefined} className={cn('rounded-md px-3 py-2 text-sm text-foreground transition-colors hover:bg-accent', isActive('/contact') && navLinkActiveCls)}>{t('common.contact')}</Link>
             </div>
           </div>
           {categories.length > 0 && (

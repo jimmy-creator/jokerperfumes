@@ -26,6 +26,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { HERO_SWATCHES, HERO_TEXT_COLOR_OPTIONS, HERO_BUTTON_COLOR_OPTIONS } from '../utils/heroStyles';
 
 const MULTILOC_ENABLED = import.meta.env.VITE_FEATURE_MULTILOC === 'true';
 
@@ -252,11 +253,122 @@ function VariantEditor({ variantOptions, variants, onChange, basePrice }) {
   );
 }
 
+// Hero-only controls for the first home banner: text colours and the two CTA
+// buttons. Colour values are stored as keys ("white" | "gold" | "black") and
+// resolved to theme tokens at render time — see utils/heroStyles.js.
+function HeroColorSelect({ label, value, options, fallback, onSet }) {
+  return (
+    <label style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+      {label}
+      <span style={{
+        width: 14, height: 14, borderRadius: 3, flexShrink: 0,
+        background: HERO_SWATCHES[value || fallback],
+        border: '1px solid var(--border)',
+      }} />
+      <select
+        value={value || fallback}
+        onChange={(e) => onSet(e.target.value)}
+        style={{ padding: '0.3rem 0.4rem', border: '1px solid var(--border)', borderRadius: 'var(--radius)', fontSize: '0.75rem', background: 'var(--bg-warm)' }}
+      >
+        {options.map((o) => <option key={o} value={o}>{o}</option>)}
+      </select>
+    </label>
+  );
+}
+
+function HeroButtonFields({ n, banner, onChange, onCommit, onSet }) {
+  const inputStyle = { padding: '0.45rem 0.6rem', border: '1px solid var(--border)', borderRadius: 'var(--radius)', fontSize: '0.8rem', background: 'var(--bg-warm)' };
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', padding: '0.6rem', border: '1px dashed var(--border)', borderRadius: 'var(--radius)' }}>
+      <strong style={{ fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '0.5px', color: 'var(--text-secondary)' }}>
+        Button {n}
+      </strong>
+      <div style={{ display: 'flex', gap: '0.4rem' }}>
+        <input
+          value={banner[`btn${n}Label`] || ''}
+          onChange={(e) => onChange(`btn${n}Label`, e.target.value)}
+          onBlur={onCommit}
+          placeholder={`Label (leave empty to hide)`}
+          style={{ ...inputStyle, flex: 1 }}
+        />
+        <input
+          value={banner[`btn${n}Link`] || ''}
+          onChange={(e) => onChange(`btn${n}Link`, e.target.value)}
+          onBlur={onCommit}
+          placeholder="Path (e.g. /products)"
+          style={{ ...inputStyle, flex: 1 }}
+        />
+      </div>
+      <div style={{ display: 'flex', gap: '0.8rem', flexWrap: 'wrap', alignItems: 'center' }}>
+        <HeroColorSelect
+          label="Button"
+          value={banner[`btn${n}Bg`]}
+          options={HERO_BUTTON_COLOR_OPTIONS}
+          fallback={n === 1 ? 'black' : 'white'}
+          onSet={(v) => onSet(`btn${n}Bg`, v)}
+        />
+        <HeroColorSelect
+          label="Label + arrow"
+          value={banner[`btn${n}Fg`]}
+          options={HERO_TEXT_COLOR_OPTIONS}
+          fallback={n === 1 ? 'white' : 'black'}
+          onSet={(v) => onSet(`btn${n}Fg`, v)}
+        />
+        <label style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.75rem', color: 'var(--text-secondary)', cursor: 'pointer' }}>
+          <input
+            type="checkbox"
+            // Undefined means "not set yet" — default to showing the arrow so
+            // existing banners keep their current look.
+            checked={banner[`btn${n}Arrow`] !== false}
+            onChange={(e) => onSet(`btn${n}Arrow`, e.target.checked)}
+          />
+          Show arrow →
+        </label>
+      </div>
+    </div>
+  );
+}
+
+function HeroBannerFields({ banner, onChange, onCommit, onSet }) {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', marginTop: '0.3rem' }}>
+      <input
+        value={banner.eyebrow || ''}
+        onChange={(e) => onChange('eyebrow', e.target.value)}
+        onBlur={onCommit}
+        placeholder="Eyebrow — small gold line above the title (leave empty to hide)"
+        style={{ padding: '0.5rem 0.75rem', border: '1px solid var(--border)', borderRadius: 'var(--radius)', fontSize: '0.82rem', background: 'var(--bg-warm)' }}
+      />
+      <div style={{ display: 'flex', gap: '0.9rem', flexWrap: 'wrap' }}>
+        <HeroColorSelect
+          label="Title"
+          value={banner.titleColor}
+          options={HERO_TEXT_COLOR_OPTIONS}
+          fallback="white"
+          onSet={(v) => onSet('titleColor', v)}
+        />
+        <HeroColorSelect
+          label="Subtitle"
+          value={banner.subtitleColor}
+          options={HERO_TEXT_COLOR_OPTIONS}
+          fallback="white"
+          onSet={(v) => onSet('subtitleColor', v)}
+        />
+      </div>
+      <HeroButtonFields n={1} banner={banner} onChange={onChange} onCommit={onCommit} onSet={onSet} />
+      <HeroButtonFields n={2} banner={banner} onChange={onChange} onCommit={onCommit} onSet={onSet} />
+    </div>
+  );
+}
+
 function BannerEditor({
   endpoint = '/settings/banners',
-  title = 'Home Banners',
-  description = 'Add up to 5 banner slides for the home page carousel. Each banner needs an image, and optionally a title, subtitle, and link.',
+  title = 'Home Banner',
+  description = 'The first banner is used as the home page hero. Set its image, headline, subtitle and the two call-to-action buttons.',
   maxBanners = 5,
+  // Hero-only controls (colours + the two CTA buttons). Off for the mid-page
+  // banner editor, which renders a plain image strip.
+  heroFields = false,
 }) {
   const [banners, setBanners] = useState([]);
   const [uploading, setUploading] = useState(false);
@@ -314,6 +426,15 @@ function BannerEditor({
   const updateBanner = (index, field, value) => {
     const updated = banners.map((b, i) => i === index ? { ...b, [field]: value } : b);
     setBanners(updated);
+  };
+
+  // Update + persist in one step. Text inputs can rely on updateBanner + an
+  // onBlur save because the two happen in separate ticks, but selects and
+  // checkboxes commit immediately — going through updateBanner there would
+  // save the pre-change `banners` from this closure and the response would
+  // overwrite the new value, making the control snap back.
+  const setBannerField = (index, field, value) => {
+    saveBanners(banners.map((b, i) => i === index ? { ...b, [field]: value } : b));
   };
 
   const removeBanner = (index) => {
@@ -393,6 +514,15 @@ function BannerEditor({
                 placeholder="Link (e.g. /products?category=Kids)"
                 style={{ padding: '0.5rem 0.75rem', border: '1px solid var(--border)', borderRadius: 'var(--radius)', fontSize: '0.82rem', background: 'var(--bg-warm)' }}
               />
+
+              {heroFields && i === 0 && (
+                <HeroBannerFields
+                  banner={banner}
+                  onChange={(field, value) => updateBanner(i, field, value)}
+                  onCommit={() => saveBanners(banners)}
+                  onSet={(field, value) => setBannerField(i, field, value)}
+                />
+              )}
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
               <button
@@ -4531,8 +4661,8 @@ export default function Admin() {
               </div>
             </div>
 
-            {/* Home Page Banners Carousel */}
-            <BannerEditor />
+            {/* Home hero — first banner drives the hero section on the storefront */}
+            <BannerEditor heroFields />
 
             {/* Mid-page Banner — rendered below the best-sellers section */}
             <BannerEditor

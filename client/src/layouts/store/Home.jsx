@@ -1,259 +1,592 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
-  ArrowRight, Package, Trash2, ShoppingBasket, Boxes, UtensilsCrossed,
-  Bath, Sparkles, LayoutGrid, Users, BadgeCheck, ShieldCheck, Truck,
+  Flame, Sparkles, Droplets, Feather, Wind, Gift, Package,
+  MessageCircle, Check, Quote,
 } from 'lucide-react';
 import api from '../../api/axios';
 import { localizedName } from '../../utils/i18nHelpers';
+import { CurrencySymbol, formatPrice } from '../../utils/currency';
 import SEO from '../../components/SEO';
 import ProductCard from './ProductCard';
-import { Button } from '@/components/ui/button';
+import { textColor, buttonColor } from '../../utils/heroStyles';
 import { Skeleton } from '@/components/ui/skeleton';
-import { cn } from '@/lib/utils';
 
-const STORE_NAME = import.meta.env.VITE_STORE_NAME || 'Elegant Bayt';
+const ROMAN = ['I', 'II', 'III', 'IV', 'V', 'VI'];
 
-// Category → icon (keyword match, falls back to a generic box).
-const CATEGORY_ICONS = [
-  [/storage|box/i, Boxes],
-  [/dust|bin|trash|waste/i, Trash2],
-  [/laundry|basket|hamper/i, ShoppingBasket],
-  [/organ/i, Package],
-  [/kitchen|utensil|dining/i, UtensilsCrossed],
-  [/bath|toilet/i, Bath],
-  [/clean|mop/i, Sparkles],
+// Per-category flourish shown under each "act" tile. Falls back to a generic
+// line for categories the store adds later.
+const ACT_TAGLINES = {
+  'Oud & Bakhoor': 'Smoke. Ritual. Presence.',
+  'Eau de Parfum': 'Bold. Commanding.',
+  'Attar & Oils': 'Traditional. Pure.',
+  Musk: 'Soft. Enduring.',
+  'Body Mist': 'Light. Everyday.',
+  'Gift Sets': 'Curated. Ready.',
+};
+
+const ACT_ICONS = [
+  [/oud|bakhoor|incense/i, Flame],
+  [/parfum|edp|perfume/i, Sparkles],
+  [/attar|oil/i, Droplets],
+  [/musk/i, Feather],
+  [/mist|body/i, Wind],
+  [/gift|set/i, Gift],
 ];
 function iconFor(name = '') {
-  for (const [re, Icon] of CATEGORY_ICONS) if (re.test(name)) return Icon;
+  for (const [re, Icon] of ACT_ICONS) if (re.test(name)) return Icon;
   return Package;
 }
 
-// Stats content lives in i18n (stats.*) — built inside StatsBar so it
-// re-renders on locale change.
+/* ── Small shared ornaments ─────────────────────────────────────────── */
 
-function SectionHead({ title, to }) {
-  const { t } = useTranslation();
+function Eyebrow({ children, className = '' }) {
   return (
-    <div className="mb-6 flex items-end justify-between gap-4">
-      <h2 className="font-serif text-2xl font-bold tracking-tight text-foreground sm:text-3xl">{title}</h2>
-      <Link to={to} className="inline-flex shrink-0 items-center gap-1 text-sm font-semibold text-primary hover:underline">
-        {t('common.viewAll')} <ArrowRight className="size-3.5" />
-      </Link>
-    </div>
+    <p
+      className={`font-serif text-xs uppercase tracking-[0.3em] ${className}`}
+      style={{ color: 'var(--copper)' }}
+    >
+      {children}
+    </p>
   );
 }
 
-function ProductGrid({ products }) {
-  return (
-    <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
-      {products.map((p) => <ProductCard key={p.id} product={p} />)}
-    </div>
-  );
+/* ── 1. Hero ────────────────────────────────────────────────────────── */
+
+// One hero CTA. Internal paths route through <Link>; hashes, external URLs and
+// mailto/tel fall back to a plain anchor so in-page jumps keep working.
+function HeroButton({ label, link, bg, fg, arrow }) {
+  if (!label) return null;
+  const className = 'px-8 py-3.5 font-serif text-sm uppercase tracking-[0.2em] transition-opacity hover:opacity-85';
+  // Arrow inherits `color`, so it always matches the label per the spec.
+  const style = { backgroundColor: buttonColor(bg), color: textColor(fg) };
+  // `undefined` means the banner predates the toggle — keep the arrow.
+  const content = arrow === false ? label : <>{label} <span aria-hidden="true">→</span></>;
+  const to = link || '/products';
+
+  if (/^(https?:|#|mailto:|tel:)/.test(to)) {
+    return <a href={to} className={className} style={style}>{content}</a>;
+  }
+  return <Link to={to} className={className} style={style}>{content}</Link>;
 }
 
-function Hero() {
-  const { t } = useTranslation();
-  return (
-    <section className="relative overflow-hidden border-b border-border">
-      {/* Full-bleed background photo */}
-      <img
-        src="/images/eb-hero.webp"
-        alt={`${STORE_NAME} plastic home appliances`}
-        className="absolute inset-0 h-full w-full object-cover object-right"
-        fetchPriority="high"
-      />
-      {/* Left scrim so the copy stays legible over the photo (stronger on mobile) */}
-      <div className="absolute inset-0 bg-gradient-to-r from-background via-background/90 to-background/40 sm:via-background/55 sm:to-transparent lg:via-background/45" />
+function Hero({ banner }) {
+  const b = banner || {};
 
-      <div className="relative mx-auto flex min-h-[440px] max-w-7xl items-center px-4 py-14 sm:min-h-[500px] lg:min-h-[580px] lg:px-8">
-        <div className="max-w-lg">
-          <p className="text-xs font-semibold uppercase tracking-[0.25em]" style={{ color: 'var(--gold)' }}>
-            {t('hero.kicker')}
+  return (
+    <section className="relative overflow-hidden border-y-[3px] border-foreground bg-foreground">
+      <picture>
+        {b.mobileImage && <source media="(max-width: 640px)" srcSet={b.mobileImage} />}
+        <img
+          src={b.image || '/images/joker/hero-circus.webp'}
+          alt=""
+          aria-hidden="true"
+          className="absolute inset-0 size-full object-cover"
+          fetchPriority="high"
+        />
+      </picture>
+
+      <div className="relative mx-auto flex min-h-[520px] max-w-[1200px] flex-col items-center justify-center px-4 py-16 text-center sm:min-h-[600px] lg:min-h-[650px]">
+        {b.eyebrow && (
+          <p
+            className="font-serif text-xs uppercase tracking-[0.3em] drop-shadow-[0_2px_6px_rgba(0,0,0,0.95)]"
+            style={{ color: 'var(--gold)' }}
+          >
+            {b.eyebrow}
           </p>
-          <h1 className="mt-4 font-serif text-4xl font-extrabold leading-[1.05] tracking-tight text-foreground sm:text-5xl lg:text-6xl">
-            {t('hero.title1')}<br />{t('hero.title2')}
+        )}
+
+        {/* Content is whatever Admin → Theme → Home Banner holds — no hardcoded
+            copy, so an empty field in the editor renders as nothing here rather
+            than silently falling back to placeholder text. */}
+        {b.title && (
+          <h1
+            className="mt-4 font-serif text-5xl uppercase leading-[0.95] tracking-wide drop-shadow-[0_2px_14px_rgba(0,0,0,0.5)] sm:text-6xl lg:text-7xl"
+            style={{ color: textColor(b.titleColor) }}
+          >
+            {b.title}
           </h1>
-          <p className="mt-5 max-w-md text-base text-muted-foreground">
-            {t('hero.desc')}
-          </p>
-          <div className="mt-8">
-            <Button asChild size="lg" className="rounded-full px-7">
-              <Link to="/products">{t('common.shopNow', { defaultValue: 'Shop Now' })} <ArrowRight className="size-4" /></Link>
-            </Button>
-          </div>
-        </div>
-      </div>
+        )}
 
-      {/* Floating trust badge */}
-      <div className="absolute bottom-5 right-5 hidden rounded-xl bg-white px-4 py-3 shadow-lg ring-1 ring-border sm:block">
-        <p className="text-[11px] font-medium text-muted-foreground">{t('hero.trustedBy')}</p>
-        <p className="text-sm font-bold text-foreground">18K+ <span className="font-medium text-muted-foreground">{t('hero.customers')}</span></p>
+        {b.subtitle && (
+          <p
+            className="font-fell mt-5 max-w-md text-base drop-shadow-[0_2px_8px_rgba(0,0,0,0.75)] sm:text-lg"
+            style={{ color: textColor(b.subtitleColor) }}
+          >
+            {b.subtitle}
+          </p>
+        )}
+
+        {(b.btn1Label || b.btn2Label) && (
+          <div className="mt-9 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
+            <HeroButton label={b.btn1Label} link={b.btn1Link} bg={b.btn1Bg} fg={b.btn1Fg} arrow={b.btn1Arrow} />
+            <HeroButton label={b.btn2Label} link={b.btn2Link} bg={b.btn2Bg} fg={b.btn2Fg} arrow={b.btn2Arrow} />
+          </div>
+        )}
       </div>
     </section>
   );
 }
 
-function CategoryStrip({ categories }) {
+/* ── 2. Choose your act (categories) ────────────────────────────────── */
+
+function ChooseYourAct({ categories }) {
   const { t } = useTranslation();
   if (!categories.length) return null;
-  const items = categories.slice(0, 7);
+  const acts = categories.slice(0, 6);
+
   return (
-    <section className="mx-auto max-w-7xl px-4 lg:px-8">
-      <div className="-mx-4 flex gap-3 overflow-x-auto px-4 py-8 [scrollbar-width:none] sm:mx-0 sm:grid sm:grid-cols-4 sm:gap-4 sm:overflow-visible sm:px-0 lg:grid-cols-8">
-        {items.map((c) => {
-          const Icon = iconFor(c.name);
-          return (
-            <Link
-              key={c.id || c.name}
-              to={`/products?category=${encodeURIComponent(c.name)}`}
-              className="group flex aspect-square w-28 shrink-0 flex-col overflow-hidden rounded-xl border border-border bg-card text-center transition-all hover:border-primary/40 hover:shadow-md sm:w-auto"
-            >
-              {c.image ? (
-                <img
-                  src={c.image}
-                  alt={localizedName(c)}
-                  loading="lazy"
-                  className="min-h-0 w-full flex-1 object-contain p-2 transition-transform group-hover:scale-105"
-                />
-              ) : (
-                <span className="flex min-h-0 w-full flex-1 items-center justify-center bg-[color:var(--bg-warm)] text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
-                  <Icon className="size-7" />
-                </span>
-              )}
-              <span className="shrink-0 px-1.5 py-2 text-xs font-medium text-foreground">{localizedName(c)}</span>
-            </Link>
-          );
-        })}
-        <Link
-          to="/products"
-          className="group flex aspect-square w-28 shrink-0 flex-col overflow-hidden rounded-xl border border-border bg-card text-center transition-all hover:border-primary/40 hover:shadow-md sm:w-auto"
+    <section id="choose-your-act" className="scroll-mt-24 bg-background px-4 py-14">
+      {/* Double frame from the design: thick gold band outside, thin black
+          rule inside. Two nested elements rather than `border: double`, which
+          can't take two colours. */}
+      <div className="mx-auto max-w-[1200px]" style={{ border: '6px solid var(--copper)' }}>
+        <div
+          className="bg-card p-6 sm:p-10"
+          style={{ border: '2px solid var(--text)' }}
         >
-          <span className="flex min-h-0 w-full flex-1 items-center justify-center bg-[color:var(--bg-warm)] text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
-            <LayoutGrid className="size-7" />
-          </span>
-          <span className="shrink-0 px-1.5 py-2 text-xs font-medium text-foreground">{t('products.allProducts')}</span>
-        </Link>
-      </div>
-    </section>
-  );
-}
-
-function StatsBar() {
-  const { t } = useTranslation();
-  const stats = [
-    { icon: Users, primary: '18K+', secondary: t('stats.happyCustomers') },
-    { icon: BadgeCheck, primary: '500+', secondary: t('stats.qualityProducts') },
-    { icon: ShieldCheck, primary: '95%', secondary: t('stats.satisfactionRate') },
-    { icon: Truck, primary: t('stats.fastDelivery'), secondary: t('stats.acrossCountry') },
-  ];
-  return (
-    <section id="why" className="mx-auto max-w-7xl scroll-mt-20 px-4 lg:px-8">
-      <div className="grid grid-cols-2 gap-6 rounded-2xl px-6 py-8 sm:grid-cols-4 sm:px-10" style={{ backgroundColor: 'var(--copper)' }}>
-        {stats.map((stat) => {
-          const Icon = stat.icon;
-          return (
-            <div key={stat.secondary} className="flex items-center gap-3 text-white">
-              <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-white/10" style={{ color: 'var(--gold)' }}>
-                <Icon className="size-5" />
-              </span>
-              <div className="min-w-0 leading-tight">
-                <p className="text-lg font-bold">{stat.primary}</p>
-                <p className="text-xs text-white/70">{stat.secondary}</p>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    </section>
-  );
-}
-
-function PromoBand() {
-  const { t } = useTranslation();
-  return (
-    <section className="mx-auto mt-16 max-w-7xl px-4 lg:px-8">
-      <div className="relative overflow-hidden rounded-2xl border border-border">
-        {/* Full-bleed background photo */}
-        <img
-          src="/images/eb-promo.webp"
-          alt="Organized plastic storage solutions"
-          className="absolute inset-0 h-full w-full object-cover object-right"
-          loading="lazy"
-        />
-        <div className="absolute inset-0 bg-gradient-to-r from-background via-background/90 to-background/30 sm:via-background/55 sm:to-transparent" />
-        <div className="relative flex min-h-[300px] max-w-md flex-col justify-center gap-4 p-8 sm:min-h-[360px] sm:p-12">
-          <h2 className="font-serif text-3xl font-extrabold leading-tight tracking-tight text-foreground sm:text-4xl">
-            {t('promo.title1')}<br /><span className="text-primary">{t('promo.title2')}</span>
+        <div className="text-center">
+          <Eyebrow>
+            ✦ {t('joker.acts.eyebrow', { defaultValue: "Tonight's Performance Schedule" })}
+          </Eyebrow>
+          <h2 className="mt-3 font-serif text-4xl uppercase tracking-wide text-foreground sm:text-5xl">
+            {t('joker.acts.title', { defaultValue: 'Choose Your' })}{' '}
+            <span style={{ color: 'var(--danger)' }}>
+              {t('joker.acts.titleAccent', { defaultValue: 'Act' })}
+            </span>
           </h2>
-          <p className="max-w-xs text-muted-foreground">{t('promo.desc')}</p>
-          <Button asChild size="lg" className="mt-2 w-fit rounded-full px-7">
-            <Link to="/products">{t('promo.explore')} <ArrowRight className="size-4" /></Link>
-          </Button>
+          <p className="font-elite mt-2 text-sm text-muted-foreground">
+            {t('joker.acts.sub', { defaultValue: 'Every performer has a signature. Find yours.' })}
+          </p>
+        </div>
+
+        <hr className="my-7 border-t-[3px] border-foreground" />
+
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+          {acts.map((c, i) => {
+            const Icon = iconFor(c.name);
+            return (
+              <Link
+                key={c.id || c.name}
+                to={`/products?category=${encodeURIComponent(c.name)}`}
+                className="group flex flex-col gap-2 border border-border p-3 transition-colors hover:border-[color:var(--danger)] hover:bg-[color:var(--bg-warm)]"
+              >
+                <span className="font-serif text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+                  {t('joker.acts.act', { defaultValue: 'Act' })} {ROMAN[i]}
+                </span>
+                <Icon className="size-5 text-foreground" strokeWidth={1.5} />
+                <span className="font-serif text-base uppercase leading-tight tracking-wide text-foreground">
+                  {localizedName(c)}
+                </span>
+                <span className="font-fell text-xs text-muted-foreground">
+                  {ACT_TAGLINES[c.name] || t('joker.acts.fallback', { defaultValue: 'Step into the ring.' })}
+                </span>
+              </Link>
+            );
+          })}
+        </div>
         </div>
       </div>
     </section>
   );
 }
 
-function Newsletter() {
+/* ── 4. Crowd favourites (featured products) ────────────────────────── */
+
+function CrowdFavourites({ products, loading }) {
+  const { t } = useTranslation();
+  return (
+    <section className="bg-[color:var(--bg-warm)] px-4 py-14">
+      <div className="mx-auto max-w-[1200px]">
+        <div className="text-center">
+          <Eyebrow>★ {t('joker.crowd.eyebrow', { defaultValue: 'The Star Acts' })}</Eyebrow>
+          <h2 className="mt-3 font-serif text-4xl uppercase tracking-wide text-foreground sm:text-5xl">
+            {t('joker.crowd.title', { defaultValue: 'Crowd Favourites' })}
+          </h2>
+          <p className="font-fell mt-2 text-sm text-muted-foreground">
+            {t('joker.crowd.sub', { defaultValue: 'Loved hard. For good reason.' })}
+          </p>
+        </div>
+
+        <div className="mt-9 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
+          {loading
+            ? Array.from({ length: 5 }).map((_, i) => (
+                <div key={i} className="flex flex-col gap-3">
+                  <Skeleton className="aspect-[4/5] w-full" />
+                  <Skeleton className="h-4 w-3/4" />
+                  <Skeleton className="h-4 w-1/3" />
+                </div>
+              ))
+            : products.slice(0, 5).map((p, i) => (
+                <ProductCard key={p.id} product={p} eager={i < 3} />
+              ))}
+        </div>
+
+        <div className="mt-9 text-center">
+          <Link
+            to="/products"
+            className="inline-block px-10 py-3 font-serif text-sm uppercase tracking-[0.2em] text-white transition-opacity hover:opacity-90"
+            style={{ backgroundColor: 'var(--copper)' }}
+          >
+            {t('common.viewAll')}
+          </Link>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ── 5. Scent quiz teaser ───────────────────────────────────────────── */
+
+function ScentQuiz() {
+  const { t } = useTranslation();
+  return (
+    <section className="bg-background px-4 py-14">
+      <div
+        className="relative mx-auto max-w-[1200px] overflow-hidden bg-card p-8 sm:p-12"
+        style={{ border: '1px solid var(--copper)' }}
+      >
+        {/* Faint concentric "crystal ball" line art, decorative only */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute -right-16 top-1/2 hidden size-[420px] -translate-y-1/2 rounded-full opacity-30 lg:block"
+          style={{ border: '1px solid var(--copper)' }}
+        >
+          <div className="absolute inset-8 rounded-full" style={{ border: '1px solid var(--copper)' }} />
+          <div className="absolute inset-20 rounded-full" style={{ border: '1px solid var(--copper)' }} />
+        </div>
+
+        <div className="relative grid items-center gap-8 lg:grid-cols-[1fr_auto]">
+          <div>
+            <Eyebrow>{t('joker.quiz.eyebrow', { defaultValue: "The Oracle's Tent" })}</Eyebrow>
+            <h2 className="mt-3 font-serif text-4xl uppercase leading-[0.95] tracking-wide text-foreground sm:text-5xl">
+              {t('joker.quiz.title1', { defaultValue: "Don't Know" })}
+              <br />
+              {t('joker.quiz.title2', { defaultValue: 'Your Scent?' })}
+            </h2>
+            <p className="font-fell mt-3 text-3xl italic sm:text-4xl" style={{ color: 'var(--copper)' }}>
+              {t('joker.quiz.tagline', { defaultValue: 'Let us read you.' })}
+            </p>
+            <p className="font-fell mt-5 max-w-sm text-sm leading-relaxed text-muted-foreground">
+              {t('joker.quiz.body', {
+                defaultValue:
+                  'Answer 5 questions. We reveal the fragrance written in your stars — no guesswork, no regrets.',
+              })}
+            </p>
+          </div>
+
+          <Link
+            to="/products"
+            className="justify-self-start bg-foreground px-8 py-3.5 font-serif text-sm uppercase tracking-[0.2em] text-white transition-colors hover:bg-[color:var(--copper)] lg:justify-self-center"
+          >
+            {t('joker.quiz.cta', { defaultValue: 'Begin the Reading' })} →
+          </Link>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ── 6. Festival gift booth ─────────────────────────────────────────── */
+
+function GiftBooth({ fromPrice }) {
+  const { t } = useTranslation();
+  const perks = [
+    t('joker.gift.perk1', { defaultValue: 'Free premium gift wrapping' }),
+    t('joker.gift.perk2', { defaultValue: 'Personalised message card' }),
+    t('joker.gift.perk3', { defaultValue: 'Express delivery available' }),
+  ];
+  return (
+    <section>
+      <div className="bg-foreground py-3 text-center">
+        <span className="font-serif text-sm uppercase tracking-[0.3em]" style={{ color: 'var(--gold)' }}>
+          ★ {t('joker.gift.banner', { defaultValue: 'Festival Gift Booth' })} ★
+        </span>
+      </div>
+
+      <div className="bg-background px-4 py-12 text-center">
+        <div className="mx-auto max-w-[1200px]">
+          <Eyebrow>✦ {t('joker.gift.eyebrow', { defaultValue: 'Eid Festival Collection' })}</Eyebrow>
+          <h2 className="mt-3 font-serif text-4xl uppercase tracking-wide text-foreground sm:text-5xl">
+            {t('joker.gift.title', { defaultValue: 'Festival Gift Sets.' })}
+          </h2>
+          {fromPrice != null && (
+            <p className="font-fell mt-1 text-2xl italic" style={{ color: 'var(--danger)' }}>
+              {t('joker.gift.from', { defaultValue: 'Starting from' })}{' '}
+              <CurrencySymbol />{formatPrice(fromPrice)}
+            </p>
+          )}
+
+          <div className="mt-7 grid gap-4 sm:grid-cols-3">
+            {perks.map((p) => (
+              <div key={p} className="flex items-center justify-center gap-2">
+                <span
+                  className="flex size-5 shrink-0 items-center justify-center rounded-full text-white"
+                  style={{ backgroundColor: 'var(--copper)' }}
+                >
+                  <Check className="size-3" strokeWidth={3} />
+                </span>
+                <span className="text-sm text-muted-foreground">{p}</span>
+              </div>
+            ))}
+          </div>
+
+          <Link
+            to="/products?category=Gift%20Sets"
+            className="mt-8 inline-block bg-foreground px-8 py-3.5 font-serif text-sm uppercase tracking-[0.2em] transition-colors hover:bg-[color:var(--copper)] hover:text-white"
+            style={{ color: 'var(--gold)' }}
+          >
+            {t('joker.gift.cta', { defaultValue: 'Claim Your Gift Set' })} →
+          </Link>
+        </div>
+      </div>
+      <hr className="border-t border-foreground" />
+    </section>
+  );
+}
+
+/* ── 7. Testimonials ────────────────────────────────────────────────── */
+
+// Shortens "Faisal Al Harbi" to "Faisal A." so the card keeps its shape
+// regardless of how long a reviewer's full name is.
+function shortName(full = '') {
+  const parts = full.trim().split(/\s+/);
+  if (parts.length < 2) return full;
+  return `${parts[0]} ${parts[1][0]}.`;
+}
+
+function RealReactions({ reviews }) {
+  const { t } = useTranslation();
+  // Nothing to show until the store has approved reviews — better an absent
+  // section than three empty cards.
+  if (!reviews.length) return null;
+
+  return (
+    <section className="bg-background">
+      {/* Silhouetted audience divider */}
+      <img
+        src="/images/joker/wall-bg.webp"
+        alt=""
+        aria-hidden="true"
+        className="h-24 w-full object-cover opacity-60"
+        loading="lazy"
+      />
+
+      <div className="mx-auto max-w-[1200px] px-4 pb-14">
+        <div className="text-center">
+          <Eyebrow>{t('joker.reactions.eyebrow', { defaultValue: 'The Crowd Says' })}</Eyebrow>
+          <h2 className="mt-3 font-serif text-4xl uppercase tracking-wide text-foreground sm:text-5xl">
+            {t('joker.reactions.title', { defaultValue: 'Real Reactions.' })}
+          </h2>
+        </div>
+
+        <div className="mt-8 grid gap-4 md:grid-cols-3">
+          {reviews.map((r) => (
+            <figure key={r.id} className="relative border border-border bg-card p-5 pt-6">
+              {/* Circus-stripe top edge */}
+              <span
+                aria-hidden="true"
+                className="absolute inset-x-0 top-0 h-1.5"
+                style={{
+                  backgroundImage:
+                    'repeating-linear-gradient(90deg, var(--danger) 0 8px, #ffffff 8px 16px)',
+                }}
+              />
+              <div className="flex items-start justify-between gap-2">
+                <Quote className="size-6 shrink-0 text-muted-foreground/30" />
+                <span className="text-sm" style={{ color: 'var(--gold)' }} aria-label={`${r.rating} out of 5`}>
+                  {'★'.repeat(r.rating)}<span className="opacity-25">{'★'.repeat(5 - r.rating)}</span>
+                </span>
+              </div>
+              <blockquote className="font-fell mt-2 text-sm italic leading-relaxed text-foreground">
+                {r.comment}
+              </blockquote>
+              <figcaption className="mt-4 flex items-center gap-2 border-t border-border pt-3">
+                <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-foreground text-[11px] font-semibold text-background">
+                  {r.name.split(' ').map((w) => w[0]).slice(0, 2).join('')}
+                </span>
+                <span className="min-w-0 flex-1 leading-tight">
+                  <span className="block truncate text-xs font-semibold text-foreground">
+                    {shortName(r.name)}
+                  </span>
+                  {r.Product?.slug ? (
+                    <Link
+                      to={`/product/${r.Product.slug}`}
+                      className="block truncate text-[11px] text-muted-foreground transition-colors hover:text-[color:var(--copper)]"
+                    >
+                      {r.Product.name}
+                    </Link>
+                  ) : null}
+                </span>
+                {r.verified && (
+                  <span
+                    className="flex shrink-0 items-center gap-1 text-[11px]"
+                    style={{ color: 'var(--success)' }}
+                  >
+                    <Check className="size-3" strokeWidth={3} />
+                    {t('joker.reactions.verified', { defaultValue: 'Verified' })}
+                  </span>
+                )}
+              </figcaption>
+            </figure>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ── 8. Ringmaster manifesto ────────────────────────────────────────── */
+
+function Ringmaster() {
+  const { t } = useTranslation();
+  return (
+    <section className="relative overflow-hidden bg-background px-4 py-16 text-center">
+      {/* Spotlight cone */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute left-1/2 top-0 h-full w-[520px] -translate-x-1/2"
+        style={{
+          background: 'linear-gradient(to bottom, color-mix(in srgb, var(--gold) 18%, transparent), transparent 70%)',
+          clipPath: 'polygon(42% 0, 58% 0, 88% 100%, 12% 100%)',
+        }}
+      />
+      <div className="relative mx-auto max-w-[1200px]">
+        <p className="text-sm" style={{ color: 'var(--gold)' }}>✦ ✦ ✦</p>
+        <Eyebrow className="mt-3">
+          {t('joker.ringmaster.eyebrow', { defaultValue: 'The Ringmaster Speaks' })}
+        </Eyebrow>
+        <h2 className="mt-4 font-serif text-4xl uppercase leading-[1.05] tracking-wide text-foreground sm:text-5xl">
+          {t('joker.ringmaster.line1', { defaultValue: 'The Show' })}
+          <br />
+          {t('joker.ringmaster.line2', { defaultValue: 'Must Always' })}
+          <br />
+          <span style={{ color: 'var(--copper)' }}>
+            {t('joker.ringmaster.line3', { defaultValue: 'Smell Good.' })}
+          </span>
+        </h2>
+        <p className="font-fell mx-auto mt-6 max-w-lg text-sm leading-relaxed text-muted-foreground">
+          {t('joker.ringmaster.body', {
+            defaultValue:
+              'Premium Arabic fragrances, officially imported and authenticated for Saudi Arabia. Every bottle is real. Every scent — unforgettable.',
+          })}
+        </p>
+        <hr className="mx-auto mt-8 max-w-2xl border-t border-border" />
+        <p className="font-fell mt-6 text-lg italic" style={{ color: 'var(--copper)' }}>
+          — {t('joker.ringmaster.sign', { defaultValue: 'The House of Joker' })}
+        </p>
+      </div>
+    </section>
+  );
+}
+
+/* ── 9. Inner circle newsletter ─────────────────────────────────────── */
+
+function InnerCircle() {
   const { t } = useTranslation();
   const [email, setEmail] = useState('');
   const [sent, setSent] = useState(false);
+
   return (
-    <section className="mx-auto mt-16 max-w-7xl px-4 lg:px-8">
-      <div className="rounded-2xl border border-border bg-card p-8 sm:p-10">
-        <div className="flex flex-col items-center gap-6 md:flex-row md:justify-between">
-          <div className="text-center md:text-left">
-            <h3 className="font-serif text-2xl font-bold tracking-tight text-foreground">{t('newsletter.title')}</h3>
-            <p className="mt-1 text-muted-foreground">
-              {t('newsletter.offerPre')} <span className="font-semibold" style={{ color: 'var(--gold)' }}>{t('newsletter.offerHighlight')}</span> {t('newsletter.offerPost')}
-            </p>
-          </div>
+    <section className="px-4 py-14" style={{ backgroundColor: 'var(--bg-warm)' }}>
+      <div className="mx-auto max-w-[1200px] p-3" style={{ backgroundColor: 'var(--copper)' }}>
+        <div className="bg-card px-6 py-10 text-center sm:px-12">
+          <p className="text-xs uppercase tracking-[0.3em]" style={{ color: 'var(--danger)' }}>
+            ✦ {t('joker.inner.eyebrow', { defaultValue: 'Inner Circle · Exclusive Access' })} ✦
+          </p>
+
+          <h2 className="mt-4 font-serif text-3xl uppercase leading-tight tracking-wide text-foreground sm:text-4xl">
+            {t('joker.inner.get', { defaultValue: 'Get' })}{' '}
+            <span style={{ color: 'var(--copper)' }}>
+              <CurrencySymbol />{formatPrice(50)}
+            </span>{' '}
+            {t('joker.inner.off', { defaultValue: 'Off' })}
+            <br />
+            {t('joker.inner.firstOrder', { defaultValue: 'Your First Order' })}
+          </h2>
+
+          <hr className="my-6 border-t border-foreground" />
+          <p className="font-elite text-xs text-muted-foreground">
+            {t('joker.inner.join', { defaultValue: 'join the circus' })}
+          </p>
+
           {sent ? (
-            <p className="text-sm font-medium text-primary">{t('newsletter.thanks')}</p>
+            <p className="mt-5 font-serif text-lg uppercase tracking-wide" style={{ color: 'var(--copper)' }}>
+              {t('newsletter.thanks')}
+            </p>
           ) : (
-            <form
-              onSubmit={(e) => { e.preventDefault(); if (email.trim()) setSent(true); }}
-              className="flex w-full max-w-md items-center gap-2"
-            >
-              <input
-                type="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder={t('newsletter.placeholder')}
-                className="h-11 min-w-0 flex-1 rounded-full border border-input bg-background px-5 text-base md:text-sm outline-none transition-[box-shadow] focus:ring-[3px] focus:ring-ring/40"
-              />
-              <Button type="submit" size="lg" className="rounded-full px-6">{t('newsletter.subscribe')}</Button>
-            </form>
+            <div className="mt-5 flex flex-col items-center justify-center gap-3 sm:flex-row">
+              <form
+                onSubmit={(e) => { e.preventDefault(); if (email.trim()) setSent(true); }}
+                className="flex w-full max-w-sm items-stretch border border-border"
+              >
+                <input
+                  type="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder={t('newsletter.placeholder')}
+                  className="min-w-0 flex-1 bg-background px-4 py-3 text-sm outline-none"
+                />
+                <button
+                  type="submit"
+                  className="shrink-0 bg-foreground px-5 font-serif text-sm uppercase tracking-[0.15em]"
+                  style={{ color: 'var(--gold)' }}
+                >
+                  {t('joker.inner.claim', { defaultValue: 'Claim' })}
+                </button>
+              </form>
+
+              <a
+                href="https://wa.me/966500000000"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex w-full max-w-sm items-center justify-center gap-2 px-6 py-3 font-serif text-sm uppercase tracking-[0.15em] text-white transition-opacity hover:opacity-90 sm:w-auto"
+                style={{ backgroundColor: '#25d366' }}
+              >
+                <MessageCircle className="size-4" />
+                {t('joker.inner.whatsapp', { defaultValue: 'Connect on WhatsApp' })}
+              </a>
+            </div>
           )}
         </div>
+
+        <p
+          className="font-elite mt-3 px-4 py-3 text-center text-sm"
+          style={{ backgroundColor: 'var(--bg-warm)', color: 'var(--text)' }}
+        >
+          {t('joker.inner.footnote', {
+            defaultValue: "Early access to new drops & festival collections. Don't miss the next show.",
+          })}
+        </p>
       </div>
     </section>
   );
 }
+
+/* ── Page ───────────────────────────────────────────────────────────── */
 
 export default function Home() {
   const { t } = useTranslation();
   const [featured, setFeatured] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [giftFrom, setGiftFrom] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [banners, setBanners] = useState(() => {
-    const cached = localStorage.getItem('cached-banners');
-    return cached ? JSON.parse(cached) : [];
-  });
-  const [activeBanner, setActiveBanner] = useState(0);
+  // The first configured banner drives the hero; null falls back to the
+  // built-in circus artwork and default copy.
+  const [heroBanner, setHeroBanner] = useState(null);
+  const [reviews, setReviews] = useState([]);
 
   useEffect(() => {
+    // Top 3 approved reviews — highest rated, newest first.
+    api.get('/reviews/top?limit=3')
+      .then((res) => setReviews(Array.isArray(res.data) ? res.data : []))
+      .catch(() => {});
+
     api.get('/settings/banners')
       .then((res) => {
-        if (Array.isArray(res.data) && res.data.length > 0) {
-          setBanners(res.data);
-          localStorage.setItem('cached-banners', JSON.stringify(res.data));
-          res.data.forEach((b) => { if (b.image) { const img = new Image(); img.src = b.image; } });
-        }
+        if (Array.isArray(res.data) && res.data.length) setHeroBanner(res.data[0]);
       })
       .catch(() => {});
 
@@ -262,118 +595,30 @@ export default function Home() {
       .catch(() => {});
 
     api.get('/products?featured=true&limit=10')
-      .then((res) => setFeatured(res.data.products))
+      .then((res) => setFeatured(res.data.products || []))
       .catch(console.error)
       .finally(() => setLoading(false));
+
+    // Cheapest gift set drives the "starting from" line.
+    api.get('/products?category=Gift%20Sets&limit=50')
+      .then((res) => {
+        const prices = (res.data.products || []).map((p) => Number(p.price)).filter(Number.isFinite);
+        if (prices.length) setGiftFrom(Math.min(...prices));
+      })
+      .catch(() => {});
   }, []);
-
-  const autoplayRef = useRef(null);
-  const touchStart = useRef(null);
-  const touchDelta = useRef(0);
-
-  const goTo = useCallback((index) => {
-    setActiveBanner(index);
-    clearInterval(autoplayRef.current);
-    autoplayRef.current = setInterval(() => {
-      setActiveBanner((prev) => (prev + 1) % banners.length);
-    }, 5000);
-  }, [banners.length]);
-
-  useEffect(() => {
-    if (banners.length <= 1) return;
-    autoplayRef.current = setInterval(() => {
-      setActiveBanner((prev) => (prev + 1) % banners.length);
-    }, 5000);
-    return () => clearInterval(autoplayRef.current);
-  }, [banners.length]);
-
-  const handleTouchStart = (e) => { touchStart.current = e.touches[0].clientX; touchDelta.current = 0; };
-  const handleTouchMove = (e) => { if (touchStart.current !== null) touchDelta.current = e.touches[0].clientX - touchStart.current; };
-  const handleTouchEnd = () => {
-    if (Math.abs(touchDelta.current) > 50) {
-      if (touchDelta.current < 0 && activeBanner < banners.length - 1) goTo(activeBanner + 1);
-      else if (touchDelta.current > 0 && activeBanner > 0) goTo(activeBanner - 1);
-    }
-    touchStart.current = null;
-    touchDelta.current = 0;
-  };
 
   return (
     <div>
       <SEO title={t('home.seoTitle')} description={t('home.seoDescription')} />
-
-      {/* ── Hero: admin banner carousel if configured, else branded hero ─── */}
-      {banners.length > 0 ? (
-        <section
-          className="relative overflow-hidden"
-          onTouchStart={handleTouchStart}
-          onTouchMove={handleTouchMove}
-          onTouchEnd={handleTouchEnd}
-        >
-          <div className="flex transition-transform duration-500 ease-out" style={{ transform: `translateX(-${activeBanner * 100}%)` }}>
-            {banners.map((banner, i) => (
-              <Link key={i} to={banner.link || '/products'} className="relative block w-full shrink-0">
-                <picture>
-                  {banner.mobileImage && <source media="(max-width: 720px)" srcSet={banner.mobileImage} />}
-                  <img
-                    src={banner.image}
-                    alt={banner.title || ''}
-                    className="aspect-[4/5] w-full object-cover sm:aspect-[16/7]"
-                    fetchPriority={i === 0 ? 'high' : 'auto'}
-                    loading={i === 0 ? 'eager' : 'lazy'}
-                  />
-                </picture>
-                <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent" />
-                <div className="absolute inset-x-0 bottom-0 mx-auto max-w-7xl p-6 text-white sm:p-10 lg:px-8">
-                  {banner.subtitle && <p className="mb-2 text-xs font-medium uppercase tracking-[0.2em] text-white/80">{banner.subtitle}</p>}
-                  {banner.title && <h2 className="max-w-xl font-serif text-3xl font-semibold sm:text-5xl">{banner.title}</h2>}
-                </div>
-              </Link>
-            ))}
-          </div>
-          {banners.length > 1 && (
-            <div className="absolute inset-x-0 bottom-4 flex justify-center gap-2">
-              {banners.map((_, i) => (
-                <button
-                  key={i}
-                  type="button"
-                  className={cn('h-1.5 rounded-full bg-white/50 transition-all', activeBanner === i ? 'w-6 bg-white' : 'w-1.5')}
-                  onClick={() => goTo(i)}
-                  aria-label={`Banner ${i + 1}`}
-                />
-              ))}
-            </div>
-          )}
-        </section>
-      ) : (
-        <Hero />
-      )}
-
-      <CategoryStrip categories={categories} />
-
-      <StatsBar />
-
-      {/* ── Best sellers ─── */}
-      <section className="mx-auto mt-16 max-w-7xl px-4 lg:px-8">
-        <SectionHead title={t('home.bestSellersTitle', { defaultValue: 'Best Selling Products' })} to="/products" />
-        {loading ? (
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
-            {Array.from({ length: 10 }).map((_, i) => (
-              <div key={i} className="flex flex-col gap-3">
-                <Skeleton className="aspect-square w-full rounded-lg" />
-                <Skeleton className="h-4 w-3/4" />
-                <Skeleton className="h-4 w-1/3" />
-              </div>
-            ))}
-          </div>
-        ) : (
-          <ProductGrid products={featured} />
-        )}
-      </section>
-
-      <PromoBand />
-
-      <Newsletter />
+      <Hero banner={heroBanner} />
+      <ChooseYourAct categories={categories} />
+      <CrowdFavourites products={featured} loading={loading} />
+      <ScentQuiz />
+      <GiftBooth fromPrice={giftFrom} />
+      <RealReactions reviews={reviews} />
+      <Ringmaster />
+      <InnerCircle />
     </div>
   );
 }

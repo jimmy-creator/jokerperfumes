@@ -1,9 +1,46 @@
 import sharedThemes from '../../themes/shared';
 
-export const defaultTheme = 'elegantBayt';
+export const defaultTheme = 'jokerPerfumes';
 
 const store4Themes = {
   ...sharedThemes,
+
+  jokerPerfumes: {
+    name: 'Joker Perfumes',
+    description: 'Big-top black, gold & circus red',
+    vars: {
+      // Bebas Neue for the condensed display caps, Inter for body. The two
+      // accent faces (--font-accent / --font-type) are Joker-specific and are
+      // consumed directly by the storefront, not by the shadcn token bridge.
+      '--font-display': "'Bebas Neue', Impact, sans-serif",
+      '--font-body': "'Inter', system-ui, sans-serif",
+      '--font-accent': "'IM Fell English', Georgia, serif",
+      '--font-type': "'Special Elite', 'Courier New', monospace",
+
+      '--copper': '#b8892a',
+      '--copper-light': '#e9a522',
+      '--copper-dark': '#a56227',
+      '--gold': '#fccd41',
+      '--bg': '#ffffff',
+      '--bg-warm': '#f9f0dc',
+      '--bg-card': '#ffffff',
+      '--bg-dark': '#111111',
+      '--bg-dark-warm': '#1c1c1c',
+      '--text': '#111111',
+      '--text-secondary': '#5a5348',
+      '--text-light': '#9a9384',
+      '--text-inverse': '#ffffff',
+      '--border': '#e5ded0',
+      '--border-light': '#f2ece0',
+      '--success': '#3d8b5f',
+      '--danger': '#b31b1b',
+      // The design is sharp-cornered — ornament comes from the gold rules,
+      // not from rounding.
+      '--radius': '2px',
+      '--radius-lg': '3px',
+    },
+    font: 'Bebas+Neue&family=IM+Fell+English:ital@0;1&family=Special+Elite&family=Inter:wght@400;500;600;700;900',
+  },
 
   elegantBayt: {
     name: 'Elegant Bayt',

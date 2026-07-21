@@ -97,6 +97,11 @@
 
   --font-sans: var(--font-body);
   --font-serif: var(--font-display);
+  /* Joker accent faces — `font-fell` (IM Fell English) for the italic serif
+     asides, `font-elite` (Special Elite) for the typewriter labels. Both fall
+     back gracefully on themes that don't define them. */
+  --font-fell: var(--font-accent, Georgia, serif);
+  --font-elite: var(--font-type, 'Courier New', monospace);
 
   /* Radii: --radius-lg matches the brand's 8px; the rest fill out the scale.
      We intentionally do NOT redefine the brand's bare --radius (4px). */

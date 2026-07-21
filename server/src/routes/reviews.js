@@ -46,6 +46,28 @@ router.get('/product/:productId', async (req, res) => {
   }
 });
 
+// Top reviews across the whole catalogue (public) — powers the "Real Reactions"
+// strip on the home page. Highest rated first, newest first within the same
+// rating, so the newest 5-star reviews surface.
+router.get('/top', async (req, res) => {
+  try {
+    const limit = Math.min(parseInt(req.query.limit, 10) || 3, 12);
+    const minRating = parseInt(req.query.minRating, 10) || 4;
+
+    const reviews = await Review.findAll({
+      where: { approved: true, rating: { [Op.gte]: minRating } },
+      order: [['rating', 'DESC'], ['createdAt', 'DESC']],
+      limit,
+      attributes: ['id', 'name', 'rating', 'title', 'comment', 'verified', 'createdAt'],
+      include: [{ model: Product, attributes: ['name', 'slug'] }],
+    });
+
+    res.json(reviews);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
 // Submit a review (logged-in users)
 router.post('/', protect, async (req, res) => {
   try {

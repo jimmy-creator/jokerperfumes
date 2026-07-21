@@ -10,6 +10,7 @@ import { WishlistProvider } from './context/WishlistContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { RecentlyViewedProvider } from './context/RecentlyViewedContext';
 import { Home, Navbar, Footer, Products, ProductDetail, ContactUs, AboutUs, PrivacyPolicy, RefundPolicy, ReturnPolicy, ShippingPolicy, TermsOfService, FloatingWhatsApp } from '@layout';
+import AnnouncementBar from './components/AnnouncementBar';
 import Wishlist from './pages/Wishlist';
 import Cart from './pages/Cart';
 import Checkout from './pages/Checkout';
@@ -120,6 +121,7 @@ export default function App() {
         <ThemeProvider>
           <Toaster position="top-right" />
           <div className="app">
+            <PosAware><AnnouncementBar /></PosAware>
             <PosAware><Navbar /></PosAware>
             <main className="main">
               <PageWrapper>

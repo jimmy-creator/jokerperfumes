@@ -3,21 +3,12 @@ import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import api from '../../api/axios';
 import { localizedName } from '../../utils/i18nHelpers';
-import { Separator } from '@/components/ui/separator';
 
 const B2B_ENABLED = import.meta.env.VITE_FEATURE_B2B === 'true';
-const STORE_NAME = import.meta.env.VITE_STORE_NAME || 'Elegant Bayt';
+const STORE_NAME = import.meta.env.VITE_STORE_NAME || 'Joker Perfumes';
 
-function FooterCol({ title, children }) {
-  return (
-    <div className="flex flex-col gap-2.5">
-      <h4 className="text-sm font-semibold uppercase tracking-wider text-white">{title}</h4>
-      <div className="flex flex-col gap-2 text-sm text-white/70 [&_a]:transition-colors [&_a:hover]:text-[color:var(--gold)]">
-        {children}
-      </div>
-    </div>
-  );
-}
+// Methods actually offered at checkout (Tap gateway + cash on delivery).
+const PAYMENTS = ['Mada', 'Visa', 'Mastercard', 'Apple Pay', 'COD'];
 
 // Brand social icons (inline SVG — avoids depending on brand icons that some
 // lucide versions drop). Links are placeholders until real profiles are shared.
@@ -27,40 +18,60 @@ const SOCIALS = [
   { label: 'WhatsApp', href: '#', path: 'M12 5.5A6.4 6.4 0 0 0 6.3 15l-.8 3 3.1-.8A6.4 6.4 0 1 0 12 5.5Zm0 1.3a5.1 5.1 0 0 1 0 10.2 5 5 0 0 1-2.6-.7l-.2-.1-1.5.4.4-1.5-.1-.2a5.1 5.1 0 0 1 4-8.1Zm-1.7 2.4c-.1-.3-.2-.3-.4-.3h-.3a.7.7 0 0 0-.5.2c-.2.2-.6.6-.6 1.4s.6 1.6.7 1.7c.1.2 1.2 1.9 3 2.6 1.5.6 1.8.5 2.1.4.3 0 1-.4 1.1-.8.2-.4.2-.7.1-.8l-.4-.2-1-.5c-.2 0-.3-.1-.4.1l-.5.6c-.1.1-.2.2-.4.1a4.2 4.2 0 0 1-1.2-.8 4.6 4.6 0 0 1-.9-1.1c0-.2 0-.3.1-.4l.3-.3.2-.3v-.3l-.5-1.2Z' },
 ];
 
+function FooterCol({ title, children }) {
+  return (
+    <div className="flex flex-col gap-2.5">
+      <h4 className="font-serif text-sm uppercase tracking-[0.2em]" style={{ color: 'var(--gold)' }}>
+        {title}
+      </h4>
+      <div className="flex flex-col gap-2 text-sm text-white/65 [&_a]:transition-colors [&_a:hover]:text-[color:var(--gold)]">
+        {children}
+      </div>
+    </div>
+  );
+}
+
 export default function Footer() {
   const { t } = useTranslation();
   const [categories, setCategories] = useState([]);
 
   useEffect(() => {
-    api.get('/categories').then(res => setCategories(res.data.slice(0, 5))).catch(() => {});
+    api.get('/categories').then((res) => setCategories(res.data.slice(0, 5))).catch(() => {});
   }, []);
 
   return (
-    <footer className="mt-16 text-white" style={{ backgroundColor: 'var(--copper)' }}>
-      <div className="mx-auto max-w-7xl px-4 py-14 lg:px-8">
+    <footer className="text-white" style={{ backgroundColor: 'var(--bg-dark)' }}>
+      {/* Ticket-stub dashed edge */}
+      <div
+        aria-hidden="true"
+        className="h-2"
+        style={{
+          backgroundImage:
+            'repeating-linear-gradient(90deg, var(--copper) 0 10px, transparent 10px 20px)',
+        }}
+      />
+
+      <div className="mx-auto max-w-[1200px] px-4 py-12">
         <div className="grid grid-cols-2 gap-8 md:grid-cols-3 lg:grid-cols-5">
           <div className="col-span-2 md:col-span-3 lg:col-span-1">
-            <Link to="/" className="flex items-center gap-2.5">
-              <span className="inline-flex items-center justify-center rounded-lg bg-white p-1.5">
-                <img src="/images/elegant-bayt-monogram.png" alt={STORE_NAME} className="h-7 w-auto" />
-              </span>
-              <span className="flex flex-col leading-none">
-                <span className="font-serif text-base font-extrabold tracking-[0.14em]">
-                  ELEGANT <span style={{ color: 'var(--gold)' }}>BAYT</span>
-                </span>
-                <span className="mt-1 text-[8px] font-medium uppercase tracking-[0.28em] text-white/60">
-                  {t('brand.tagline')}
-                </span>
-              </span>
+            <Link to="/" className="inline-block">
+              <img
+                src="/images/joker/logo-footer.webp"
+                alt={STORE_NAME}
+                className="h-16 w-auto"
+                loading="lazy"
+              />
             </Link>
-            <p className="mt-4 max-w-xs text-sm text-white/70">{t('home.seoDescription')}</p>
+            <p className="font-fell mt-4 max-w-xs text-sm text-white/60">
+              {t('home.seoDescription')}
+            </p>
             <div className="mt-5 flex gap-2.5">
               {SOCIALS.map((s) => (
                 <a
                   key={s.label}
                   href={s.href}
                   aria-label={s.label}
-                  className="inline-flex size-9 items-center justify-center rounded-full bg-white/10 text-white transition-colors hover:bg-[color:var(--gold)] hover:text-[color:var(--copper)]"
+                  className="inline-flex size-9 items-center justify-center border border-white/15 text-white transition-colors hover:border-[color:var(--gold)] hover:text-[color:var(--gold)]"
                 >
                   <svg viewBox="0 0 24 24" className="size-4" fill="currentColor" aria-hidden="true">
                     <path d={s.path} />
@@ -72,8 +83,10 @@ export default function Footer() {
 
           <FooterCol title={t('footer.shop')}>
             <Link to="/products">{t('products.allProducts')}</Link>
-            {categories.map(cat => (
-              <Link key={cat.id} to={`/products?category=${encodeURIComponent(cat.name)}`}>{localizedName(cat)}</Link>
+            {categories.map((cat) => (
+              <Link key={cat.id} to={`/products?category=${encodeURIComponent(cat.name)}`}>
+                {localizedName(cat)}
+              </Link>
             ))}
           </FooterCol>
 
@@ -99,10 +112,30 @@ export default function Footer() {
           </FooterCol>
         </div>
 
-        <Separator className="my-8 bg-white/15" />
+        <div className="mt-10 flex flex-wrap gap-2">
+          {PAYMENTS.map((p) => (
+            <span
+              key={p}
+              className="border border-white/20 px-3 py-1.5 text-[11px] uppercase tracking-wider text-white/50"
+            >
+              {p}
+            </span>
+          ))}
+        </div>
 
-        <div className="text-center text-xs text-white/60">
-          {t('footer.copyright', { year: new Date().getFullYear(), store: STORE_NAME })}
+        <hr className="my-7 border-t border-white/10" />
+
+        <div className="flex flex-col items-center justify-between gap-3 text-xs text-white/50 sm:flex-row">
+          <span>{t('footer.copyright', { year: new Date().getFullYear(), store: STORE_NAME })}</span>
+          <span className="flex gap-3">
+            <Link to="/privacy-policy" className="transition-colors hover:text-[color:var(--gold)]">
+              {t('footer.privacyPolicy')}
+            </Link>
+            <span aria-hidden="true">·</span>
+            <Link to="/terms" className="transition-colors hover:text-[color:var(--gold)]">
+              {t('footer.terms')}
+            </Link>
+          </span>
         </div>
       </div>
     </footer>
