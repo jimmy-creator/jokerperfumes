@@ -32,13 +32,22 @@ export default function AnnouncementBar() {
   useEffect(() => {
     api.get('/settings/announcements')
       .then((res) => {
+        // A static host with a catch-all SPA rewrite answers /api/* with
+        // index.html and a 200, so `.catch` never fires. Anything that is not
+        // an array means there is no real backend behind this — fall back.
+        // A genuine empty array is respected: clearing every announcement in
+        // Admin must still empty the bar.
+        if (!Array.isArray(res.data)) {
+          setItems((prev) => (prev.length ? prev : PLACEHOLDER_ANNOUNCEMENTS));
+          return;
+        }
         const clean = normalise(res.data);
         setItems(clean);
         localStorage.setItem('cached-announcements', JSON.stringify(clean));
       })
-      // Unreachable API (backend-less demo) — show placeholder copy rather
-      // than an empty strip. Deliberately not cached, so it cannot outlive
-      // the outage and mask real announcements later.
+      // Unreachable API — show placeholder copy rather than an empty strip.
+      // Deliberately not cached, so it cannot outlive the outage and mask
+      // real announcements later.
       .catch(() => setItems((prev) => (prev.length ? prev : PLACEHOLDER_ANNOUNCEMENTS)));
   }, []);
 
