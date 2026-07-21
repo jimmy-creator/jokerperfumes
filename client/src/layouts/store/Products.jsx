@@ -5,6 +5,7 @@ import { SlidersHorizontal, LayoutGrid, Grid2x2, ChevronLeft, ChevronRight } fro
 import api from '../../api/axios';
 import SEO from '../../components/SEO';
 import ProductCard from './ProductCard';
+import { PLACEHOLDER_PRODUCTS, PLACEHOLDER_CATEGORY_NAMES } from '../../utils/placeholders';
 import { Button } from '@/components/ui/button';
 import {
   Select,
@@ -42,7 +43,12 @@ export default function Products() {
   const order = searchParams.get('order') || 'DESC';
 
   useEffect(() => {
-    api.get('/products/categories').then((res) => setCategories(res.data)).catch(() => {});
+    api.get('/products/categories')
+      .then((res) => {
+        const rows = Array.isArray(res.data) ? res.data : [];
+        setCategories(rows.length ? rows : PLACEHOLDER_CATEGORY_NAMES);
+      })
+      .catch(() => setCategories(PLACEHOLDER_CATEGORY_NAMES));
   }, []);
 
   useEffect(() => {
@@ -56,7 +62,14 @@ export default function Products() {
         setProducts(res.data.products);
         setTotalPages(res.data.totalPages);
       })
-      .catch(console.error)
+      // Unreachable API — show the placeholder catalogue, filtered by the
+      // active category so the category links still behave sensibly.
+      .catch(() => {
+        setProducts(category
+          ? PLACEHOLDER_PRODUCTS.filter((p) => p.category === category)
+          : PLACEHOLDER_PRODUCTS);
+        setTotalPages(1);
+      })
       .finally(() => setLoading(false));
 
     window.scrollTo({ top: 0, behavior: 'smooth' });

@@ -11,6 +11,10 @@ import { CurrencySymbol, formatPrice } from '../../utils/currency';
 import SEO from '../../components/SEO';
 import ProductCard from './ProductCard';
 import { textColor, buttonColor } from '../../utils/heroStyles';
+import {
+  PLACEHOLDER_BANNER, PLACEHOLDER_CATEGORIES, PLACEHOLDER_PRODUCTS,
+  PLACEHOLDER_REVIEWS, PLACEHOLDER_GIFT_FROM,
+} from '../../utils/placeholders';
 import { Skeleton } from '@/components/ui/skeleton';
 
 const ROMAN = ['I', 'II', 'III', 'IV', 'V', 'VI'];
@@ -579,33 +583,46 @@ export default function Home() {
   const [reviews, setReviews] = useState([]);
 
   useEffect(() => {
-    // Top 3 approved reviews — highest rated, newest first.
+    // Every fetch below falls back to placeholder content when the API is
+    // unreachable or returns nothing, so a backend-less demo still renders a
+    // complete page. A successful response is always used as-is — including
+    // when a field is deliberately empty.
     api.get('/reviews/top?limit=3')
-      .then((res) => setReviews(Array.isArray(res.data) ? res.data : []))
-      .catch(() => {});
+      .then((res) => {
+        const rows = Array.isArray(res.data) ? res.data : [];
+        setReviews(rows.length ? rows : PLACEHOLDER_REVIEWS);
+      })
+      .catch(() => setReviews(PLACEHOLDER_REVIEWS));
 
     api.get('/settings/banners')
       .then((res) => {
-        if (Array.isArray(res.data) && res.data.length) setHeroBanner(res.data[0]);
+        const rows = Array.isArray(res.data) ? res.data : [];
+        setHeroBanner(rows.length ? rows[0] : PLACEHOLDER_BANNER);
       })
-      .catch(() => {});
+      .catch(() => setHeroBanner(PLACEHOLDER_BANNER));
 
     api.get('/categories')
-      .then((res) => setCategories(Array.isArray(res.data) ? res.data : []))
-      .catch(() => {});
+      .then((res) => {
+        const rows = Array.isArray(res.data) ? res.data : [];
+        setCategories(rows.length ? rows : PLACEHOLDER_CATEGORIES);
+      })
+      .catch(() => setCategories(PLACEHOLDER_CATEGORIES));
 
     api.get('/products?featured=true&limit=10')
-      .then((res) => setFeatured(res.data.products || []))
-      .catch(console.error)
+      .then((res) => {
+        const rows = res.data?.products || [];
+        setFeatured(rows.length ? rows : PLACEHOLDER_PRODUCTS);
+      })
+      .catch(() => setFeatured(PLACEHOLDER_PRODUCTS))
       .finally(() => setLoading(false));
 
     // Cheapest gift set drives the "starting from" line.
     api.get('/products?category=Gift%20Sets&limit=50')
       .then((res) => {
-        const prices = (res.data.products || []).map((p) => Number(p.price)).filter(Number.isFinite);
-        if (prices.length) setGiftFrom(Math.min(...prices));
+        const prices = (res.data?.products || []).map((p) => Number(p.price)).filter(Number.isFinite);
+        setGiftFrom(prices.length ? Math.min(...prices) : PLACEHOLDER_GIFT_FROM);
       })
-      .catch(() => {});
+      .catch(() => setGiftFrom(PLACEHOLDER_GIFT_FROM));
   }, []);
 
   return (

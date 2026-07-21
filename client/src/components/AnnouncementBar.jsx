@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import api from '../api/axios';
+import { PLACEHOLDER_ANNOUNCEMENTS } from '../utils/placeholders';
 
 // This store saves announcements as plain strings, but the cache key lives on
 // `localhost:5173`, an origin shared with the sibling storefronts in this repo
@@ -35,7 +36,10 @@ export default function AnnouncementBar() {
         setItems(clean);
         localStorage.setItem('cached-announcements', JSON.stringify(clean));
       })
-      .catch(() => {});
+      // Unreachable API (backend-less demo) — show placeholder copy rather
+      // than an empty strip. Deliberately not cached, so it cannot outlive
+      // the outage and mask real announcements later.
+      .catch(() => setItems((prev) => (prev.length ? prev : PLACEHOLDER_ANNOUNCEMENTS)));
   }, []);
 
   if (!items.length) return null;

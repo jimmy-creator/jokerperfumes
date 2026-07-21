@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import api from '../../api/axios';
 import { localizedName } from '../../utils/i18nHelpers';
+import { PLACEHOLDER_CATEGORIES } from '../../utils/placeholders';
 
 const B2B_ENABLED = import.meta.env.VITE_FEATURE_B2B === 'true';
 const STORE_NAME = import.meta.env.VITE_STORE_NAME || 'Joker Perfumes';
@@ -36,7 +37,12 @@ export default function Footer() {
   const [categories, setCategories] = useState([]);
 
   useEffect(() => {
-    api.get('/categories').then((res) => setCategories(res.data.slice(0, 5))).catch(() => {});
+    api.get('/categories')
+      .then((res) => {
+        const rows = Array.isArray(res.data) ? res.data : [];
+        setCategories((rows.length ? rows : PLACEHOLDER_CATEGORIES).slice(0, 5));
+      })
+      .catch(() => setCategories(PLACEHOLDER_CATEGORIES.slice(0, 5)));
   }, []);
 
   return (

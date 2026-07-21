@@ -10,6 +10,7 @@ import api from '../../api/axios';
 import ScrollToTopButton from '../../components/ScrollToTopButton';
 import ProductImage from '../../components/ProductImage';
 import { CURRENCY, formatPrice } from '../../utils/currency';
+import { PLACEHOLDER_CATEGORIES } from '../../utils/placeholders';
 import { localizedName } from '../../utils/i18nHelpers';
 import { Button } from '@/components/ui/button';
 import {
@@ -66,7 +67,12 @@ export default function Navbar() {
   }, [showSearch]);
 
   useEffect(() => {
-    api.get('/categories').then((res) => setCategories(Array.isArray(res.data) ? res.data : [])).catch(() => {});
+    api.get('/categories')
+      .then((res) => {
+        const rows = Array.isArray(res.data) ? res.data : [];
+        setCategories(rows.length ? rows : PLACEHOLDER_CATEGORIES);
+      })
+      .catch(() => setCategories(PLACEHOLDER_CATEGORIES));
   }, []);
 
   useEffect(() => {
