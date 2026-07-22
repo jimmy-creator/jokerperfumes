@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { X, Sparkles, Ticket } from 'lucide-react';
+import { X, Sparkles, Ticket, Copy, Check } from 'lucide-react';
 import api from '../../api/axios';
 import { useAuth } from '../../context/AuthContext';
 
@@ -241,12 +241,28 @@ export default function PuzzleGameModal({ open, onClose }) {
 }
 
 function CouponCode({ code, label }) {
-  const copy = () => { navigator.clipboard?.writeText(code); };
+  const [copied, setCopied] = useState(false);
+  const copy = () => {
+    if (!navigator.clipboard) return;
+    navigator.clipboard.writeText(code).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1600);
+    }).catch(() => {});
+  };
   return (
-    <button type="button" onClick={copy} title="Click to copy"
-      className="mx-auto mt-3 flex items-center gap-2 border border-dashed px-4 py-2 font-mono text-lg tracking-widest transition-colors hover:bg-white/5"
+    <div className="mx-auto mt-3 flex w-full max-w-xs items-center justify-between gap-2 border border-dashed px-4 py-2"
       style={{ borderColor: 'var(--gold)', color: 'var(--gold)' }}>
-      <Ticket className="size-4" /> {code}{label ? <span className="text-xs text-white/50">· {label}</span> : null}
-    </button>
+      <span className="flex items-center gap-2 font-mono text-lg tracking-widest">
+        <Ticket className="size-4 shrink-0" /> {code}
+      </span>
+      <span className="flex items-center gap-2">
+        {label ? <span className="text-xs text-white/50">{label}</span> : null}
+        <button type="button" onClick={copy} aria-label="Copy code"
+          className="flex items-center gap-1 rounded-sm px-2 py-1 text-xs uppercase tracking-wider transition-colors hover:bg-white/10">
+          {copied ? <Check className="size-3.5" /> : <Copy className="size-3.5" />}
+          {copied ? 'Copied' : 'Copy'}
+        </button>
+      </span>
+    </div>
   );
 }
