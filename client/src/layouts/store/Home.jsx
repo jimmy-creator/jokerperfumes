@@ -385,9 +385,10 @@ function RealReactions({ reviews }) {
           </h2>
         </div>
 
-        <div className="mt-8 grid gap-4 md:grid-cols-3">
+        {/* Mobile: horizontal snap-scroll. Desktop (md+): 3-column grid. */}
+        <div className="mt-8 -mx-4 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:mx-0 md:grid md:grid-cols-3 md:overflow-visible md:px-0 md:pb-0">
           {reviews.map((r) => (
-            <figure key={r.id} className="relative border border-border bg-card p-5 pt-6">
+            <figure key={r.id} className="relative w-[80%] shrink-0 snap-start border border-border bg-card p-5 pt-6 sm:w-[46%] md:w-auto md:shrink">
               {/* Circus-stripe top edge */}
               <span
                 aria-hidden="true"
