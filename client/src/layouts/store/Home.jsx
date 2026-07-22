@@ -10,6 +10,7 @@ import { localizedName } from '../../utils/i18nHelpers';
 import { CurrencySymbol, formatPrice } from '../../utils/currency';
 import SEO from '../../components/SEO';
 import ProductCard from './ProductCard';
+import ScentQuizModal from './ScentQuizModal';
 import { textColor, buttonColor } from '../../utils/heroStyles';
 import {
   PLACEHOLDER_BANNER, PLACEHOLDER_CATEGORIES, PLACEHOLDER_PRODUCTS,
@@ -245,6 +246,7 @@ function CrowdFavourites({ products, loading }) {
 
 function ScentQuiz() {
   const { t } = useTranslation();
+  const [quizOpen, setQuizOpen] = useState(false);
   return (
     <section className="bg-background px-4 py-14">
       <div
@@ -280,14 +282,17 @@ function ScentQuiz() {
             </p>
           </div>
 
-          <Link
-            to="/products"
+          <button
+            type="button"
+            onClick={() => setQuizOpen(true)}
             className="justify-self-start bg-foreground px-8 py-3.5 font-serif text-sm uppercase tracking-[0.2em] text-white transition-colors hover:bg-[color:var(--copper)] lg:justify-self-center"
           >
             {t('joker.quiz.cta', { defaultValue: 'Begin the Reading' })} →
-          </Link>
+          </button>
         </div>
       </div>
+
+      <ScentQuizModal open={quizOpen} onClose={() => setQuizOpen(false)} />
     </section>
   );
 }

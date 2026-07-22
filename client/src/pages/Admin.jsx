@@ -573,6 +573,70 @@ function BannerEditor({
   );
 }
 
+// Maps each of the four fixed scent-quiz archetypes to a real store category.
+// The storefront "Oracle's Tent" quiz reads this via /settings/scent-quiz-map.
+const QUIZ_ARCHETYPE_LABELS = [
+  { key: 'bold', label: 'The Ringmaster', desc: 'Bold · smoky · oud' },
+  { key: 'fresh', label: 'The Aerialist', desc: 'Fresh · citrus · clean' },
+  { key: 'warm', label: 'The Sweetheart', desc: 'Warm · sweet · amber' },
+  { key: 'mysterious', label: 'The Fortune Teller', desc: 'Dark · musk · woody' },
+];
+
+function ScentQuizMapEditor() {
+  const [cats, setCats] = useState([]);
+  const [map, setMap] = useState({});
+
+  useEffect(() => {
+    api.get('/categories/all').then((res) => setCats(Array.isArray(res.data) ? res.data : [])).catch(() => {});
+    api.get('/settings/scent-quiz-map').then((res) => setMap(res.data && typeof res.data === 'object' ? res.data : {})).catch(() => {});
+  }, []);
+
+  const save = async (next) => {
+    try {
+      await api.put('/settings/scent-quiz-map', { map: next });
+      setMap(next);
+      toast.success('Scent quiz mapping saved');
+    } catch {
+      toast.error('Failed to save mapping');
+    }
+  };
+
+  const update = (key, value) => save({ ...map, [key]: value });
+
+  return (
+    <div style={{ marginTop: '3rem' }}>
+      <h3 style={{ fontSize: '0.82rem', textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-secondary)', fontWeight: 600, marginBottom: '1rem' }}>
+        Scent Quiz — Category Mapping
+      </h3>
+      <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '1.25rem' }}>
+        The Oracle&apos;s Tent quiz on the home page sorts each visitor into one of four archetypes. Choose which category each result should open. Leave a result on &ldquo;All products&rdquo; to send it to the full catalogue.
+      </p>
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', maxWidth: '560px' }}>
+        {QUIZ_ARCHETYPE_LABELS.map(({ key, label, desc }) => (
+          <div key={key} style={{
+            display: 'grid', gridTemplateColumns: '1fr 220px', gap: '1rem', alignItems: 'center',
+            padding: '0.85rem 1rem', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', background: 'var(--bg-card)',
+          }}>
+            <div>
+              <strong style={{ fontSize: '0.9rem' }}>{label}</strong>
+              <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{desc}</div>
+            </div>
+            <select
+              value={map[key] || ''}
+              onChange={(e) => update(key, e.target.value)}
+              style={{ padding: '0.5rem', border: '1px solid var(--border)', borderRadius: 'var(--radius)', background: 'var(--bg)', color: 'var(--text)' }}
+            >
+              <option value="">All products</option>
+              {cats.map((c) => <option key={c.id} value={c.name}>{c.name}</option>)}
+            </select>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function CategoryCardsEditor() {
   const [cards, setCards] = useState([]);
 
@@ -4674,6 +4738,9 @@ export default function Admin() {
 
             {/* Category Cards — large coloured tiles on the home page */}
             <CategoryCardsEditor />
+
+            {/* Scent quiz — maps quiz archetypes to real categories */}
+            <ScentQuizMapEditor />
 
             {/* Announcement bar — rotating promo strings shown above the navbar */}
             <AnnouncementEditor />

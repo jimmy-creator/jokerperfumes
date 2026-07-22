@@ -130,6 +130,39 @@ router.put('/category-cards', protect, admin, async (req, res) => {
   }
 });
 
+// Scent-quiz mapping (which real category each quiz archetype resolves to).
+// The storefront quiz always produces one of four fixed archetypes; the admin
+// maps each to a current category name so the quiz survives category changes.
+const QUIZ_ARCHETYPES = ['bold', 'fresh', 'warm', 'mysterious'];
+
+router.get('/scent-quiz-map', async (req, res) => {
+  try {
+    const setting = await Setting.findByPk('scent-quiz-map');
+    const map = setting?.value ? JSON.parse(setting.value) : {};
+    res.json(map);
+  } catch (error) {
+    res.json({});
+  }
+});
+
+router.put('/scent-quiz-map', protect, admin, async (req, res) => {
+  try {
+    const { map } = req.body;
+    if (!map || typeof map !== 'object' || Array.isArray(map)) {
+      return res.status(400).json({ message: 'Provide a { archetype: categoryName } map' });
+    }
+    // Keep only known archetype keys with string category names.
+    const clean = {};
+    for (const key of QUIZ_ARCHETYPES) {
+      if (typeof map[key] === 'string' && map[key].trim()) clean[key] = map[key].trim();
+    }
+    await Setting.upsert({ key: 'scent-quiz-map', value: JSON.stringify(clean) });
+    res.json(clean);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
 // Announcement bar (rotating promo strings shown above the navbar)
 router.get('/announcements', async (req, res) => {
   try {
