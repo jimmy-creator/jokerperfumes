@@ -26,6 +26,7 @@ import CashTransfer from './CashTransfer.js';
 import ActivityLog from './ActivityLog.js';
 import StockCount from './StockCount.js';
 import StockCountLine from './StockCountLine.js';
+import PuzzleReward from './PuzzleReward.js';
 import sequelize from '../config/database.js';
 
 // ── MariaDB JSON-column fix ──────────────────────────────────────
@@ -54,6 +55,9 @@ sequelize.addHook('afterFind', (result) => {
 // ── Existing associations ────────────────────────────────────────
 User.hasMany(Order, { foreignKey: 'userId' });
 Order.belongsTo(User, { foreignKey: 'userId' });
+
+User.hasMany(PuzzleReward, { foreignKey: 'userId' });
+PuzzleReward.belongsTo(User, { foreignKey: 'userId' });
 
 Product.hasMany(Review, { foreignKey: 'productId' });
 Review.belongsTo(Product, { foreignKey: 'productId' });
@@ -222,6 +226,7 @@ export {
   CashAccount, CashTransaction, ExpenseCategory, Expense, CashTransfer,
   ActivityLog,
   StockCount, StockCountLine,
+  PuzzleReward,
 };
 
 // ── Activity log + manager-override helpers ─────────────────────

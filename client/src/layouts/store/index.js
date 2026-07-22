@@ -11,3 +11,4 @@ export { default as ReturnPolicy } from './ReturnPolicy';
 export { default as ShippingPolicy } from './ShippingPolicy';
 export { default as TermsOfService } from './TermsOfService';
 export { default as FloatingWhatsApp } from './FloatingWhatsApp';
+export { default as GameLauncher } from './GameLauncher';

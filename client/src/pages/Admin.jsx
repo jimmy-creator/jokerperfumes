@@ -637,6 +637,88 @@ function ScentQuizMapEditor() {
   );
 }
 
+// Admin control for the storefront word-puzzle game ("The Joker's Riddle").
+function PuzzleGameEditor() {
+  const [cfg, setCfg] = useState(null);
+
+  useEffect(() => {
+    api.get('/settings/puzzle-config').then((res) => setCfg(res.data)).catch(() => {});
+  }, []);
+
+  if (!cfg) return null;
+
+  const setField = (field, value) => setCfg({ ...cfg, [field]: value });
+  const setLevel = (i, field, value) =>
+    setCfg({ ...cfg, levels: cfg.levels.map((l, j) => (j === i ? { ...l, [field]: value } : l)) });
+
+  const save = async () => {
+    try {
+      const { data } = await api.put('/settings/puzzle-config', { config: cfg });
+      setCfg(data);
+      toast.success('Puzzle game saved');
+    } catch {
+      toast.error('Failed to save the puzzle game');
+    }
+  };
+
+  const inputStyle = { padding: '0.5rem', border: '1px solid var(--border)', borderRadius: 'var(--radius)', background: 'var(--bg)', color: 'var(--text)', width: '100%' };
+
+  return (
+    <div style={{ marginTop: '3rem' }}>
+      <h3 style={{ fontSize: '0.82rem', textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-secondary)', fontWeight: 600, marginBottom: '1rem' }}>
+        Word Puzzle Game
+      </h3>
+      <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '1.25rem' }}>
+        &ldquo;The Joker&apos;s Riddle&rdquo; floating game on the storefront. Each solved level gives the logged-in player a personal, single-use discount coupon. Set the hidden word, its clue, and the reward for each level.
+      </p>
+
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1.5rem', alignItems: 'center', marginBottom: '1.25rem' }}>
+        <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.9rem', cursor: 'pointer' }}>
+          <input type="checkbox" checked={!!cfg.enabled} onChange={(e) => setField('enabled', e.target.checked)} />
+          Game enabled (show on storefront)
+        </label>
+        <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.9rem' }}>
+          Coupon expires after
+          <input type="number" min={1} max={365} value={cfg.rewardDays}
+            onChange={(e) => setField('rewardDays', e.target.value)}
+            style={{ ...inputStyle, width: '80px' }} />
+          days
+        </label>
+      </div>
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', maxWidth: '640px' }}>
+        {cfg.levels.map((l, i) => (
+          <div key={l.level} style={{
+            display: 'grid', gridTemplateColumns: '150px 1fr 110px', gap: '1rem', alignItems: 'end',
+            padding: '1rem', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', background: 'var(--bg-card)',
+          }}>
+            <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+              Level {l.level} — word
+              <input value={l.word} onChange={(e) => setLevel(i, 'word', e.target.value.toUpperCase())}
+                style={{ ...inputStyle, marginTop: '0.35rem', textTransform: 'uppercase', letterSpacing: '2px' }} />
+            </label>
+            <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+              Clue
+              <input value={l.clue} onChange={(e) => setLevel(i, 'clue', e.target.value)}
+                style={{ ...inputStyle, marginTop: '0.35rem' }} />
+            </label>
+            <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+              Reward %
+              <input type="number" min={1} max={100} value={l.discount}
+                onChange={(e) => setLevel(i, 'discount', e.target.value)}
+                style={{ ...inputStyle, marginTop: '0.35rem' }} />
+            </label>
+          </div>
+        ))}
+      </div>
+
+      <button className="btn btn-primary" style={{ marginTop: '1.25rem' }} onClick={save}>
+        Save puzzle game
+      </button>
+    </div>
+  );
+}
+
 function CategoryCardsEditor() {
   const [cards, setCards] = useState([]);
 
@@ -4741,6 +4823,9 @@ export default function Admin() {
 
             {/* Scent quiz — maps quiz archetypes to real categories */}
             <ScentQuizMapEditor />
+
+            {/* Word puzzle game — words, clues, rewards, on/off */}
+            <PuzzleGameEditor />
 
             {/* Announcement bar — rotating promo strings shown above the navbar */}
             <AnnouncementEditor />

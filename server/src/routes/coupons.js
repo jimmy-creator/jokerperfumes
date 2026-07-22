@@ -14,6 +14,7 @@ router.get('/available', async (req, res) => {
     const coupons = await Coupon.findAll({
       where: {
         active: true,
+        assignedUserId: null, // hide private, per-user game rewards
         [Op.and]: [
           { [Op.or]: [{ startDate: null }, { startDate: { [Op.lte]: now } }] },
           { [Op.or]: [{ endDate: null }, { endDate: { [Op.gt]: now } }] },
@@ -64,6 +65,12 @@ router.post('/apply', optionalAuth, async (req, res) => {
 
     if (!coupon) {
       return res.status(404).json({ message: 'Invalid coupon code' });
+    }
+
+    // User-locked coupons (e.g. puzzle-game rewards) only redeem on the
+    // account they were issued to.
+    if (coupon.assignedUserId && (!req.user || req.user.id !== coupon.assignedUserId)) {
+      return res.status(400).json({ message: 'This reward is linked to a different account' });
     }
 
     // Check dates

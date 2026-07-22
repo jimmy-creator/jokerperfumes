@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { Setting } from '../models/index.js';
 import { protect, admin, requirePermission } from '../middleware/auth.js';
+import { getPuzzleConfig, normalizeForSave } from '../services/puzzleConfig.js';
 
 const router = Router();
 
@@ -157,6 +158,25 @@ router.put('/scent-quiz-map', protect, admin, async (req, res) => {
       if (typeof map[key] === 'string' && map[key].trim()) clean[key] = map[key].trim();
     }
     await Setting.upsert({ key: 'scent-quiz-map', value: JSON.stringify(clean) });
+    res.json(clean);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Word-puzzle game config (admin only — it contains the answer words).
+router.get('/puzzle-config', protect, admin, async (req, res) => {
+  try {
+    res.json(await getPuzzleConfig());
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+router.put('/puzzle-config', protect, admin, async (req, res) => {
+  try {
+    const clean = normalizeForSave(req.body.config || req.body);
+    await Setting.upsert({ key: 'puzzle-config', value: JSON.stringify(clean) });
     res.json(clean);
   } catch (error) {
     res.status(500).json({ message: error.message });

@@ -76,6 +76,13 @@ const Coupon = sequelize.define('Coupon', {
     type: DataTypes.JSON,
     defaultValue: null,
   },
+  assignedUserId: {
+    // When set, only this user may redeem the coupon (used for
+    // per-player game rewards). null = public coupon, anyone may use.
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    defaultValue: null,
+  },
 });
 
 export default Coupon;
