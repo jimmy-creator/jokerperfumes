@@ -4,9 +4,9 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-// Brand monogram (the "eb" mark used in the navbar/footer). Falls back to
+// Brand mark (the Joker circle emblem used in the browser tab). Falls back to
 // text-only header if the file is missing on the deploy target.
-const LOGO_PATH = path.resolve(__dirname, '../../../client/public/images/elegant-bayt-monogram.png');
+const LOGO_PATH = path.resolve(__dirname, '../../../client/public/images/joker/logo-circle.png');
 
 const storeName = process.env.STORE_NAME || 'ShopHub';
 const storeTagline = process.env.STORE_TAGLINE || 'Elegance at Home';

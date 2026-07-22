@@ -64,7 +64,7 @@ export default function Footer() {
               <img
                 src="/images/joker/logo-footer.webp"
                 alt={STORE_NAME}
-                className="h-16 w-auto"
+                className="h-28 w-auto"
                 loading="lazy"
               />
             </Link>
