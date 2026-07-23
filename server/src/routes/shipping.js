@@ -224,6 +224,11 @@ router.post('/webhook/status', async (req, res) => {
     const updates = { shippingMeta: meta };
     if (orderStatusUpdate && orderStatusUpdate !== order.orderStatus) {
       updates.orderStatus = orderStatusUpdate;
+      // Stamp deliveredAt on first delivery — starts the influencer
+      // commission return-window clock (services/commissionJob.js).
+      if (orderStatusUpdate === 'delivered' && !order.deliveredAt) {
+        updates.deliveredAt = new Date();
+      }
     }
     await order.update(updates);
 

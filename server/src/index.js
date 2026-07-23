@@ -52,6 +52,9 @@ import stockCountsRoutes from './routes/stockCounts.js';
 import { registerShiprocketHooks } from './services/shiprocketSync.js';
 import { startAbandonedCartJob } from './services/abandonedCartJob.js';
 import { startLowStockJob } from './services/lowStockJob.js';
+import { startCommissionJob } from './services/commissionJob.js';
+import influencerRoutes from './routes/influencers.js';
+import referralRoutes from './routes/referrals.js';
 import sitemapRoutes from './routes/sitemap.js';
 import { sanitizeInput, preventInjection, forceHttps } from './middleware/security.js';
 import htmlInject from './middleware/htmlInject.js';
@@ -147,6 +150,8 @@ app.use('/api/purchase-returns', purchaseReturnsRoutes);
 app.use('/api/finance', financeRoutes);
 app.use('/api/activity-log', activityLogRoutes);
 app.use('/api/stock-counts', stockCountsRoutes);
+app.use('/api/influencers', influencerRoutes);
+app.use('/api/referrals', referralRoutes);
 app.use('/', sitemapRoutes);
 
 // Serve the built client bundles. Needed on hosts WITHOUT nginx (e.g.
@@ -203,6 +208,7 @@ const start = async () => {
       verifyEmailTransport().catch(() => {}); // logs whether SMTP email works
       startAbandonedCartJob();
       startLowStockJob();
+      startCommissionJob();
       registerShiprocketHooks();
       seedDefaultAccountsIfEmpty().catch((err) =>
         console.error('[finance/seed]', err.message)

@@ -6,6 +6,7 @@ import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { ShieldCheck, Lock, User, X } from 'lucide-react';
 import api from '../api/axios';
+import { getRef, getCampaign } from '../utils/referral';
 import toast from 'react-hot-toast';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -194,6 +195,8 @@ export default function Checkout() {
       shippingMethod,
       paymentMethod: form.paymentMethod,
       couponCode: couponApplied?.code || null,
+      referralCode: getRef() || null,
+      referralCampaign: getCampaign() || null,
     };
 
     if (isGuest) {
@@ -227,6 +230,8 @@ export default function Checkout() {
       shippingMethod,
       gateway: 'razorpay',
       couponCode: couponApplied?.code || null,
+      referralCode: getRef() || null,
+      referralCampaign: getCampaign() || null,
     };
     if (isGuest) createPayload.guestEmail = form.email;
 
@@ -299,6 +304,8 @@ export default function Checkout() {
       shippingMethod,
       gateway: 'stripe',
       couponCode: couponApplied?.code || null,
+      referralCode: getRef() || null,
+      referralCampaign: getCampaign() || null,
     };
     if (isGuest) createPayload.guestEmail = form.email;
 
@@ -319,6 +326,8 @@ export default function Checkout() {
       shippingMethod,
       gateway: 'nomod',
       couponCode: couponApplied?.code || null,
+      referralCode: getRef() || null,
+      referralCampaign: getCampaign() || null,
     };
     if (isGuest) createPayload.guestEmail = form.email;
 
@@ -339,6 +348,8 @@ export default function Checkout() {
       shippingMethod,
       gateway: 'tap',
       couponCode: couponApplied?.code || null,
+      referralCode: getRef() || null,
+      referralCampaign: getCampaign() || null,
     };
     if (isGuest) createPayload.guestEmail = form.email;
 
@@ -359,6 +370,8 @@ export default function Checkout() {
       shippingMethod,
       gateway: 'tamara',
       couponCode: couponApplied?.code || null,
+      referralCode: getRef() || null,
+      referralCampaign: getCampaign() || null,
     };
     if (isGuest) createPayload.guestEmail = form.email;
 
@@ -404,6 +417,8 @@ export default function Checkout() {
       shippingMethod,
       gateway: 'paytm',
       couponCode: couponApplied?.code || null,
+      referralCode: getRef() || null,
+      referralCampaign: getCampaign() || null,
     };
     if (isGuest) paytmPayload.guestEmail = form.email;
 

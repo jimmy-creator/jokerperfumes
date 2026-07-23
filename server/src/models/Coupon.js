@@ -83,6 +83,14 @@ const Coupon = sequelize.define('Coupon', {
     allowNull: true,
     defaultValue: null,
   },
+  influencerId: {
+    // When set, this is an influencer's customer-facing discount coupon.
+    // Redeeming it attributes commission to that influencer even without
+    // a referral-link cookie. null = not tied to any influencer.
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    defaultValue: null,
+  },
 });
 
 export default Coupon;

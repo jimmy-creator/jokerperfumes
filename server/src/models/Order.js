@@ -81,6 +81,40 @@ const Order = sequelize.define('Order', {
     type: DataTypes.STRING,
     allowNull: true,
   },
+  // ── Influencer referral attribution ──────────────────────────────
+  // Set when the order is attributed to an approved influencer (via
+  // referral link cookie or their discount coupon). commissionStatus
+  // is driven by commissionJob: pending → approved → paid, or reversed.
+  influencerId: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+  },
+  referralCode: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  referralCampaign: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  commissionRate: {
+    type: DataTypes.DECIMAL(8, 2),
+    allowNull: true,
+  },
+  commissionAmount: {
+    type: DataTypes.DECIMAL(10, 2),
+    defaultValue: 0,
+  },
+  commissionStatus: {
+    type: DataTypes.ENUM('none', 'pending', 'approved', 'reversed', 'paid'),
+    defaultValue: 'none',
+  },
+  // Timestamp the order reached 'delivered' — starts the commission
+  // return-window clock (see services/commissionJob.js).
+  deliveredAt: {
+    type: DataTypes.DATE,
+    allowNull: true,
+  },
   // Per-tender breakdown for split-payment POS sales.
   // null = single tender (use paymentMethod as before). When set,
   // paymentMethod is 'pos_split' and this is an array like

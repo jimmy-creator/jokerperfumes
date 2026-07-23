@@ -52,6 +52,12 @@ export const requirePermission = (...perms) => {
   };
 };
 
+// Guard a route to one or more specific roles (e.g. requireRole('influencer')).
+export const requireRole = (...roles) => (req, res, next) => {
+  if (req.user && roles.includes(req.user.role)) return next();
+  res.status(403).json({ message: 'Forbidden' });
+};
+
 // Sets req.user if token exists, but doesn't block if missing
 export const optionalAuth = async (req, res, next) => {
   try {

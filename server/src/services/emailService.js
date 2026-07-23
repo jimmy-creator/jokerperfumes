@@ -562,3 +562,46 @@ export async function sendQuoteEmail({ to, customerName, request, bankDetails })
 }
 
 export default { sendOrderConfirmation, sendOrderStatusUpdate, sendPaymentConfirmation, sendPasswordResetEmail, sendAbandonedCartEmail, sendNewOrderNotification, sendQuoteEmail };
+
+// ============================================
+// INFLUENCER PROGRAM
+// ============================================
+const partnerDashboardUrl = `${(process.env.CLIENT_URL || 'http://localhost:5173').replace(/\/$/, '')}/influencer/dashboard`;
+
+export async function sendInfluencerApproved(to, { name, referralCode, commissionType, commissionRate }) {
+  const earn = commissionType === 'fixed' ? `${formatPrice(commissionRate)} per order` : `${commissionRate}% per order`;
+  const html = baseTemplate(`
+    <div style="text-align:center;margin-bottom:24px;">
+      <div style="width:56px;height:56px;background:#dcfce7;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;margin-bottom:12px;"><span style="font-size:28px;">🎉</span></div>
+      <h2 style="margin:0 0 4px;font-size:22px;color:${textMain};">You're approved!</h2>
+      <p style="margin:0;font-size:14px;color:${textDim};">Welcome to the ${storeName} Partner Program, ${name || 'there'}.</p>
+    </div>
+    <div style="background:${brandLight};border:1px solid ${brandBorder};border-radius:6px;padding:16px;margin-bottom:20px;">
+      <table style="width:100%;border-collapse:collapse;">
+        <tr><td style="padding:6px 0;font-size:13px;color:${textDim};">Your code</td><td style="padding:6px 0;font-size:13px;color:${textMain};text-align:right;font-weight:700;">${referralCode}</td></tr>
+        <tr><td style="padding:6px 0;font-size:13px;color:${textDim};">You earn</td><td style="padding:6px 0;font-size:13px;color:${textMain};text-align:right;font-weight:600;">${earn}</td></tr>
+      </table>
+    </div>
+    <p style="font-size:14px;color:${textMain};">Grab your referral link, share it with your audience, and start earning on every order.</p>
+    <div style="text-align:center;margin-top:20px;"><a href="${partnerDashboardUrl}" style="display:inline-block;background:${brandColor};color:#fff;text-decoration:none;padding:12px 28px;border-radius:999px;font-size:14px;font-weight:600;">Open your dashboard</a></div>
+  `);
+  return sendEmail(to, `You're approved — ${storeName} Partner Program 🎉`, html);
+}
+
+export async function sendInfluencerPayout(to, { name, amount, method, reference }) {
+  const html = baseTemplate(`
+    <div style="text-align:center;margin-bottom:24px;">
+      <div style="width:56px;height:56px;background:#dcfce7;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;margin-bottom:12px;"><span style="font-size:28px;">💸</span></div>
+      <h2 style="margin:0 0 4px;font-size:22px;color:${textMain};">Payout sent</h2>
+      <p style="margin:0;font-size:14px;color:${textDim};">${formatPrice(amount)} is on its way, ${name || 'there'}.</p>
+    </div>
+    <div style="background:${brandLight};border:1px solid ${brandBorder};border-radius:6px;padding:16px;">
+      <table style="width:100%;border-collapse:collapse;">
+        <tr><td style="padding:6px 0;font-size:13px;color:${textDim};">Amount</td><td style="padding:6px 0;font-size:13px;color:${textMain};text-align:right;font-weight:700;">${formatPrice(amount)}</td></tr>
+        ${method ? `<tr><td style="padding:6px 0;font-size:13px;color:${textDim};">Method</td><td style="padding:6px 0;font-size:13px;color:${textMain};text-align:right;text-transform:uppercase;">${method}</td></tr>` : ''}
+        ${reference ? `<tr><td style="padding:6px 0;font-size:13px;color:${textDim};">Reference</td><td style="padding:6px 0;font-size:13px;color:${textMain};text-align:right;">${reference}</td></tr>` : ''}
+      </table>
+    </div>
+  `);
+  return sendEmail(to, `Your ${storeName} payout of ${formatPrice(amount)} 💸`, html);
+}

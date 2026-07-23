@@ -7,10 +7,11 @@ import { autoCreateShipment } from '../services/shipping.js';
 import { Op } from 'sequelize';
 import { calculateTax } from '../utils/tax.js';
 import { calculateShipping } from '../utils/shipping.js';
+import { resolveInfluencer, computeCommission } from '../services/referral.js';
 
 // Reuse coupon logic
 async function applyCouponForPayment(couponCode, subtotal, userId, orderItems = [], paymentMethod = null) {
-  if (!couponCode) return { discount: 0, code: null };
+  if (!couponCode) return { discount: 0, code: null, influencerId: null };
   const coupon = await Coupon.findOne({
     where: { code: couponCode.toUpperCase().trim(), active: true },
   });
@@ -56,7 +57,7 @@ async function applyCouponForPayment(couponCode, subtotal, userId, orderItems = 
   discount = Math.min(discount, subtotal);
   discount = Math.round(discount * 100) / 100;
   await coupon.increment('usedCount');
-  return { discount, code: coupon.code };
+  return { discount, code: coupon.code, influencerId: coupon.influencerId || null };
 }
 
 // Decrement stock for a paid order's items, including per-variant stock for
@@ -146,7 +147,7 @@ router.post('/calculate-tax', async (req, res) => {
 // Create payment order
 router.post('/create-order', optionalAuth, async (req, res) => {
   try {
-    const { items, shippingAddress, gateway = process.env.PAYMENT_GATEWAY || 'razorpay', guestEmail, couponCode } = req.body;
+    const { items, shippingAddress, gateway = process.env.PAYMENT_GATEWAY || 'razorpay', guestEmail, couponCode, referralCode, referralCampaign } = req.body;
     const isGuest = !req.user;
 
     if (!items || items.length === 0) {
@@ -205,10 +206,19 @@ router.post('/create-order', optionalAuth, async (req, res) => {
     });
 
     // Apply coupon
-    const { discount, code: appliedCode } = await applyCouponForPayment(
+    const { discount, code: appliedCode, influencerId: couponInfluencerId } = await applyCouponForPayment(
       couponCode, totalAmount, isGuest ? null : req.user.id, orderItems, gateway
     );
     const afterDiscount = Math.round((totalAmount - discount) * 100) / 100;
+
+    // Influencer referral attribution (commission on the net product subtotal)
+    const influencer = await resolveInfluencer({
+      referralCode,
+      couponInfluencerId,
+      buyerUserId: isGuest ? null : req.user.id,
+      buyerEmail: isGuest ? guestEmail : req.user?.email,
+    });
+    const commissionAmount = influencer ? computeCommission(influencer, afterDiscount) : 0;
 
     // Calculate tax
     const { totalTax, breakdown: taxBreakdown } = calculateTax(orderItems);
@@ -238,6 +248,12 @@ router.post('/create-order', optionalAuth, async (req, res) => {
       shippingMethod,
       couponCode: appliedCode,
       discount,
+      influencerId: influencer ? influencer.id : null,
+      referralCode: influencer ? influencer.referralCode : null,
+      referralCampaign: influencer ? (referralCampaign || null) : null,
+      commissionRate: influencer ? influencer.commissionRate : null,
+      commissionAmount,
+      commissionStatus: influencer ? 'pending' : 'none',
       taxAmount: totalTax,
       taxBreakdown,
     });

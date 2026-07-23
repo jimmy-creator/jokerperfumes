@@ -30,6 +30,9 @@ import WholesaleQuoteDetail from './pages/WholesaleQuoteDetail';
 import ShiprocketCheckout from './pages/ShiprocketCheckout';
 import PosLogin from './pages/PosLogin';
 import Pos from './pages/Pos';
+import InfluencerApply from './pages/InfluencerApply';
+import InfluencerDashboard from './pages/InfluencerDashboard';
+import { captureRef } from './utils/referral';
 
 const B2B_ENABLED = import.meta.env.VITE_FEATURE_B2B === 'true';
 const SHIPROCKET_CHECKOUT = import.meta.env.VITE_FEATURE_SHIPROCKET_CHECKOUT === 'true';
@@ -74,6 +77,14 @@ function ScrollToTop() {
   return null;
 }
 
+// Capture ?ref= referral codes into a cookie on every navigation so the
+// influencer gets credited for the order placed at checkout.
+function RefCapture() {
+  const { pathname, search } = useLocation();
+  useEffect(() => { captureRef(); }, [pathname, search]);
+  return null;
+}
+
 function PageWrapper({ children }) {
   const { pathname } = useLocation();
   return <div key={pathname} className="page-transition">{children}</div>;
@@ -113,6 +124,7 @@ export default function App() {
     <HelmetProvider>
     <BrowserRouter>
       <ScrollToTop />
+      <RefCapture />
       <LocaleManager />
       <AuthProvider>
         <CartProvider>
@@ -161,6 +173,8 @@ export default function App() {
                       <Route path={p('/refund-policy')} element={<RefundPolicy />} />
                       <Route path={p('/shipping-policy')} element={<ShippingPolicy />} />
                       <Route path={p('/terms')} element={<TermsOfService />} />
+                      <Route path={p('/influencer/apply')} element={<InfluencerApply />} />
+                      <Route path={p('/influencer/dashboard')} element={<InfluencerDashboard />} />
                       {B2B_ENABLED && <Route path={p('/wholesale')} element={<Wholesale />} />}
                       {B2B_ENABLED && <Route path={p('/wholesale/request')} element={<WholesaleRequest />} />}
                       {B2B_ENABLED && <Route path={p('/wholesale/my-quotes')} element={<WholesaleQuotes />} />}

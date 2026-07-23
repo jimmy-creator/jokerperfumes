@@ -5,6 +5,7 @@ import { sendOrderConfirmation, sendOrderStatusUpdate, sendNewOrderNotification 
 import { calculateTax } from '../utils/tax.js';
 import { calculateShipping } from '../utils/shipping.js';
 import { autoCreateShipment } from '../services/shipping.js';
+import { resolveInfluencer, computeCommission } from '../services/referral.js';
 
 const generateOrderNumber = () => {
   const prefix = 'ORD';
@@ -94,7 +95,7 @@ async function reduceStock(items, products) {
 
 // Apply coupon and return discount amount
 async function applyCoupon(couponCode, subtotal, userId) {
-  if (!couponCode) return { discount: 0, code: null };
+  if (!couponCode) return { discount: 0, code: null, influencerId: null };
 
   const coupon = await Coupon.findOne({
     where: { code: couponCode.toUpperCase().trim(), active: true },
@@ -136,20 +137,24 @@ async function applyCoupon(couponCode, subtotal, userId) {
   // Increment usage
   await coupon.increment('usedCount');
 
-  return { discount, code: coupon.code };
+  return { discount, code: coupon.code, influencerId: coupon.influencerId || null };
 }
 
 export const createOrder = async (req, res) => {
   try {
-    const { items, shippingAddress, paymentMethod, couponCode, shippingMethod = 'standard' } = req.body;
+    const { items, shippingAddress, paymentMethod, couponCode, shippingMethod = 'standard', referralCode, referralCampaign } = req.body;
 
     if (!items || items.length === 0) {
       return res.status(400).json({ message: 'No items in order' });
     }
 
     const { orderItems, totalAmount, products } = await buildOrderItems(items);
-    const { discount, code } = await applyCoupon(couponCode, totalAmount, req.user.id);
+    const { discount, code, influencerId: couponInfluencerId } = await applyCoupon(couponCode, totalAmount, req.user.id);
     const afterDiscount = Math.round((totalAmount - discount) * 100) / 100;
+
+    // Influencer referral attribution (commission on net subtotal)
+    const influencer = await resolveInfluencer({ referralCode, couponInfluencerId, buyerUserId: req.user.id, buyerEmail: req.user.email });
+    const commissionAmount = influencer ? computeCommission(influencer, afterDiscount) : 0;
 
     const { totalTax, breakdown } = calculateTax(orderItems);
 
@@ -169,6 +174,12 @@ export const createOrder = async (req, res) => {
       shippingMethod,
       couponCode: code,
       discount,
+      influencerId: influencer ? influencer.id : null,
+      referralCode: influencer ? influencer.referralCode : null,
+      referralCampaign: influencer ? (referralCampaign || null) : null,
+      commissionRate: influencer ? influencer.commissionRate : null,
+      commissionAmount,
+      commissionStatus: influencer ? 'pending' : 'none',
       taxAmount: totalTax,
       taxBreakdown: breakdown,
     });
@@ -190,7 +201,7 @@ export const createOrder = async (req, res) => {
 
 export const createGuestOrder = async (req, res) => {
   try {
-    const { items, shippingAddress, paymentMethod, guestEmail, couponCode, shippingMethod = 'standard' } = req.body;
+    const { items, shippingAddress, paymentMethod, guestEmail, couponCode, shippingMethod = 'standard', referralCode, referralCampaign } = req.body;
 
     if (!items || items.length === 0) {
       return res.status(400).json({ message: 'No items in order' });
@@ -205,8 +216,12 @@ export const createGuestOrder = async (req, res) => {
     }
 
     const { orderItems, totalAmount, products } = await buildOrderItems(items);
-    const { discount, code } = await applyCoupon(couponCode, totalAmount, null, guestEmail);
+    const { discount, code, influencerId: couponInfluencerId } = await applyCoupon(couponCode, totalAmount, null, guestEmail);
     const afterDiscount = Math.round((totalAmount - discount) * 100) / 100;
+
+    // Influencer referral attribution (commission on net subtotal)
+    const influencer = await resolveInfluencer({ referralCode, couponInfluencerId, buyerUserId: null, buyerEmail: guestEmail });
+    const commissionAmount = influencer ? computeCommission(influencer, afterDiscount) : 0;
 
     const { totalTax, breakdown } = calculateTax(orderItems);
 
@@ -227,6 +242,12 @@ export const createGuestOrder = async (req, res) => {
       shippingMethod,
       couponCode: code,
       discount,
+      influencerId: influencer ? influencer.id : null,
+      referralCode: influencer ? influencer.referralCode : null,
+      referralCampaign: influencer ? (referralCampaign || null) : null,
+      commissionRate: influencer ? influencer.commissionRate : null,
+      commissionAmount,
+      commissionStatus: influencer ? 'pending' : 'none',
       taxAmount: totalTax,
       taxBreakdown: breakdown,
     });
@@ -318,6 +339,9 @@ export const updateOrderStatus = async (req, res) => {
       ...(orderStatus && { orderStatus }),
       ...(paymentStatus && { paymentStatus }),
       ...(trackingNumber && { trackingNumber }),
+      // Stamp deliveredAt on first transition to 'delivered' — starts the
+      // influencer commission return-window clock (commissionJob.js).
+      ...(orderStatus === 'delivered' && !order.deliveredAt && { deliveredAt: new Date() }),
     });
 
     if (orderStatus && orderStatus !== previousStatus) {

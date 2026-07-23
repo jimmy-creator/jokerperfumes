@@ -32,7 +32,8 @@ export default function Login() {
     try {
       const data = await login(email, password);
       toast.success('Welcome back!');
-      navigate(data.user?.role === 'admin' || data.user?.role === 'staff' ? '/admin' : '/');
+      const role = data.user?.role;
+      navigate(role === 'admin' || role === 'staff' ? '/admin' : role === 'influencer' ? '/influencer/dashboard' : '/');
     } catch (error) {
       toast.error(error.response?.data?.message || 'Login failed');
     } finally {

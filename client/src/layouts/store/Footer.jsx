@@ -106,6 +106,7 @@ export default function Footer() {
           <FooterCol title={t('footer.company')}>
             <Link to="/about">{t('footer.aboutUs')}</Link>
             <Link to="/contact">{t('footer.contactUs')}</Link>
+            <Link to="/influencer/apply">{t('footer.becomePartner', 'Become a Partner')}</Link>
             {B2B_ENABLED && <Link to="/wholesale">{t('common.wholesale')}</Link>}
             <Link to="/privacy-policy">{t('footer.privacyPolicy')}</Link>
             <Link to="/terms">{t('footer.terms')}</Link>

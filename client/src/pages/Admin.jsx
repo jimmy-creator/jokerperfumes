@@ -12,6 +12,7 @@ import PurchaseReturnModals from '../components/admin/PurchaseReturnModals';
 import FinanceTabs from '../components/admin/FinanceTabs';
 import BarcodeLabels from '../components/admin/BarcodeLabels';
 import StockCounts from '../components/admin/StockCounts';
+import InfluencersAdmin from '../components/admin/InfluencersAdmin';
 import { Menu, LogOut, Plus, Pencil, Trash2, X, Eye, EyeOff, Search, Image as ImageIcon, Star, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -1520,6 +1521,7 @@ export default function Admin() {
         { tab: 'customers',    label: 'Customers',    show: hasAccess('customers') },
         { tab: 'reviews',      label: 'Reviews',      show: hasAccess('reviews') },
         { tab: 'staff',        label: 'Staff',        show: isAdmin },
+        { tab: 'influencers',  label: 'Influencers',  show: isAdmin },
         { tab: 'cashiers',     label: 'Cashiers',     show: MULTILOC_ENABLED && isAdmin },
         { tab: 'activity-log', label: 'Activity Log', show: MULTILOC_ENABLED && hasAccess('analytics') },
     ]},
@@ -4210,6 +4212,8 @@ export default function Admin() {
             })()}
           </div>
         )}
+
+        {tab === 'influencers' && <InfluencersAdmin />}
 
         {tab === 'coupons' && (
           <div>

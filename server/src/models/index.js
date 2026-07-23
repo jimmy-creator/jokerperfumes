@@ -27,6 +27,9 @@ import ActivityLog from './ActivityLog.js';
 import StockCount from './StockCount.js';
 import StockCountLine from './StockCountLine.js';
 import PuzzleReward from './PuzzleReward.js';
+import Influencer from './Influencer.js';
+import Payout from './Payout.js';
+import ReferralClick from './ReferralClick.js';
 import sequelize from '../config/database.js';
 
 // ── MariaDB JSON-column fix ──────────────────────────────────────
@@ -58,6 +61,18 @@ Order.belongsTo(User, { foreignKey: 'userId' });
 
 User.hasMany(PuzzleReward, { foreignKey: 'userId' });
 PuzzleReward.belongsTo(User, { foreignKey: 'userId' });
+
+// ── Influencer referral program ──────────────────────────────────
+User.hasOne(Influencer, { foreignKey: 'userId' });
+Influencer.belongsTo(User, { foreignKey: 'userId' });
+Influencer.hasMany(Order, { foreignKey: 'influencerId' });
+Order.belongsTo(Influencer, { foreignKey: 'influencerId' });
+Influencer.hasMany(Payout, { foreignKey: 'influencerId' });
+Payout.belongsTo(Influencer, { foreignKey: 'influencerId' });
+Influencer.hasMany(ReferralClick, { foreignKey: 'influencerId' });
+ReferralClick.belongsTo(Influencer, { foreignKey: 'influencerId' });
+Coupon.belongsTo(Influencer, { foreignKey: 'influencerId' });
+Influencer.hasMany(Coupon, { foreignKey: 'influencerId' });
 
 Product.hasMany(Review, { foreignKey: 'productId' });
 Review.belongsTo(Product, { foreignKey: 'productId' });
@@ -227,6 +242,7 @@ export {
   ActivityLog,
   StockCount, StockCountLine,
   PuzzleReward,
+  Influencer, Payout, ReferralClick,
 };
 
 // ── Activity log + manager-override helpers ─────────────────────
