@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import api from '../api/axios';
-import { PLACEHOLDER_ANNOUNCEMENTS } from '../utils/placeholders';
 
 // This store saves announcements as plain strings, but the cache key lives on
 // `localhost:5173`, an origin shared with the sibling storefronts in this repo
@@ -34,21 +33,13 @@ export default function AnnouncementBar() {
       .then((res) => {
         // A static host with a catch-all SPA rewrite answers /api/* with
         // index.html and a 200, so `.catch` never fires. Anything that is not
-        // an array means there is no real backend behind this — fall back.
-        // A genuine empty array is respected: clearing every announcement in
-        // Admin must still empty the bar.
-        if (!Array.isArray(res.data)) {
-          setItems((prev) => (prev.length ? prev : PLACEHOLDER_ANNOUNCEMENTS));
-          return;
-        }
+        // an array means there is no real backend behind this — ignore it.
+        if (!Array.isArray(res.data)) return;
         const clean = normalise(res.data);
         setItems(clean);
         localStorage.setItem('cached-announcements', JSON.stringify(clean));
       })
-      // Unreachable API — show placeholder copy rather than an empty strip.
-      // Deliberately not cached, so it cannot outlive the outage and mask
-      // real announcements later.
-      .catch(() => setItems((prev) => (prev.length ? prev : PLACEHOLDER_ANNOUNCEMENTS)));
+      .catch(() => {});
   }, []);
 
   if (!items.length) return null;

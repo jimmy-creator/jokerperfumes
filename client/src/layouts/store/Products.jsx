@@ -5,7 +5,6 @@ import { SlidersHorizontal, LayoutGrid, Grid2x2, ChevronLeft, ChevronRight } fro
 import api from '../../api/axios';
 import SEO from '../../components/SEO';
 import ProductCard from './ProductCard';
-import { PLACEHOLDER_PRODUCTS, PLACEHOLDER_CATEGORY_NAMES } from '../../utils/placeholders';
 import { Button } from '@/components/ui/button';
 import {
   Select,
@@ -45,10 +44,9 @@ export default function Products() {
   useEffect(() => {
     api.get('/products/categories')
       .then((res) => {
-        const rows = Array.isArray(res.data) ? res.data : [];
-        setCategories(rows.length ? rows : PLACEHOLDER_CATEGORY_NAMES);
+        setCategories(Array.isArray(res.data) ? res.data : []);
       })
-      .catch(() => setCategories(PLACEHOLDER_CATEGORY_NAMES));
+      .catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -62,12 +60,8 @@ export default function Products() {
         setProducts(res.data.products);
         setTotalPages(res.data.totalPages);
       })
-      // Unreachable API — show the placeholder catalogue, filtered by the
-      // active category so the category links still behave sensibly.
       .catch(() => {
-        setProducts(category
-          ? PLACEHOLDER_PRODUCTS.filter((p) => p.category === category)
-          : PLACEHOLDER_PRODUCTS);
+        setProducts([]);
         setTotalPages(1);
       })
       .finally(() => setLoading(false));

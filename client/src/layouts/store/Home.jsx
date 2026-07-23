@@ -12,10 +12,6 @@ import SEO from '../../components/SEO';
 import ProductCard from './ProductCard';
 import ScentQuizModal from './ScentQuizModal';
 import { textColor, buttonColor } from '../../utils/heroStyles';
-import {
-  PLACEHOLDER_BANNER, PLACEHOLDER_CATEGORIES, PLACEHOLDER_PRODUCTS,
-  PLACEHOLDER_REVIEWS, PLACEHOLDER_GIFT_FROM,
-} from '../../utils/placeholders';
 import { Skeleton } from '@/components/ui/skeleton';
 
 const ROMAN = ['I', 'II', 'III', 'IV', 'V', 'VI'];
@@ -595,40 +591,37 @@ export default function Home() {
     // when a field is deliberately empty.
     api.get('/reviews/top?limit=3')
       .then((res) => {
-        const rows = Array.isArray(res.data) ? res.data : [];
-        setReviews(rows.length ? rows : PLACEHOLDER_REVIEWS);
+        setReviews(Array.isArray(res.data) ? res.data : []);
       })
-      .catch(() => setReviews(PLACEHOLDER_REVIEWS));
+      .catch(() => {});
 
     api.get('/settings/banners')
       .then((res) => {
         const rows = Array.isArray(res.data) ? res.data : [];
-        setHeroBanner(rows.length ? rows[0] : PLACEHOLDER_BANNER);
+        setHeroBanner(rows[0] || null);
       })
-      .catch(() => setHeroBanner(PLACEHOLDER_BANNER));
+      .catch(() => {});
 
     api.get('/categories')
       .then((res) => {
-        const rows = Array.isArray(res.data) ? res.data : [];
-        setCategories(rows.length ? rows : PLACEHOLDER_CATEGORIES);
+        setCategories(Array.isArray(res.data) ? res.data : []);
       })
-      .catch(() => setCategories(PLACEHOLDER_CATEGORIES));
+      .catch(() => {});
 
     api.get('/products?featured=true&limit=10')
       .then((res) => {
-        const rows = res.data?.products || [];
-        setFeatured(rows.length ? rows : PLACEHOLDER_PRODUCTS);
+        setFeatured(res.data?.products || []);
       })
-      .catch(() => setFeatured(PLACEHOLDER_PRODUCTS))
+      .catch(() => {})
       .finally(() => setLoading(false));
 
     // Cheapest gift set drives the "starting from" line.
     api.get('/products?category=Gift%20Sets&limit=50')
       .then((res) => {
         const prices = (res.data?.products || []).map((p) => Number(p.price)).filter(Number.isFinite);
-        setGiftFrom(prices.length ? Math.min(...prices) : PLACEHOLDER_GIFT_FROM);
+        setGiftFrom(prices.length ? Math.min(...prices) : null);
       })
-      .catch(() => setGiftFrom(PLACEHOLDER_GIFT_FROM));
+      .catch(() => {});
   }, []);
 
   return (
