@@ -5,6 +5,7 @@ import { Toaster } from 'react-hot-toast';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { HelmetProvider } from 'react-helmet-async';
 import { AuthProvider } from './context/AuthContext';
+import { RegionProvider } from './context/RegionContext';
 import { CartProvider } from './context/CartContext';
 import { WishlistProvider } from './context/WishlistContext';
 import { ThemeProvider } from './context/ThemeContext';
@@ -127,6 +128,7 @@ export default function App() {
       <RefCapture />
       <LocaleManager />
       <AuthProvider>
+        <RegionProvider>
         <CartProvider>
         <WishlistProvider>
         <RecentlyViewedProvider>
@@ -195,6 +197,7 @@ export default function App() {
         </RecentlyViewedProvider>
         </WishlistProvider>
         </CartProvider>
+        </RegionProvider>
       </AuthProvider>
     </BrowserRouter>
     </HelmetProvider>

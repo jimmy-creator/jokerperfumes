@@ -81,6 +81,17 @@ const Order = sequelize.define('Order', {
     type: DataTypes.STRING,
     allowNull: true,
   },
+  // Region the order was placed in ('sa' | 'in') and its ISO currency, so
+  // amounts are interpreted in the right currency across admin/invoices.
+  // null for legacy/POS orders placed before dual-region (treated as Saudi).
+  region: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  currencyCode: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
   // ── Influencer referral attribution ──────────────────────────────
   // Set when the order is attributed to an approved influencer (via
   // referral link cookie or their discount coupon). commissionStatus

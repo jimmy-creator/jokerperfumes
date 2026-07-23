@@ -2,10 +2,11 @@ import { Link } from 'react-router-dom';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import SEO from '../../components/SEO';
+import RegionPolicyNote from '../../components/RegionPolicyNote';
 
 const STORE_NAME = import.meta.env.VITE_STORE_NAME || 'Elegant Bayt';
 
-export default function StaticPage({ title, titleAr, description, descriptionAr, children }) {
+export default function StaticPage({ title, titleAr, description, descriptionAr, regionNote = false, children }) {
   const { i18n } = useTranslation();
   const isAr = i18n.language === 'ar';
   const displayTitle = isAr && titleAr ? titleAr : title;
@@ -34,6 +35,7 @@ export default function StaticPage({ title, titleAr, description, descriptionAr,
           [&_section]:mt-2
           [&_.s2-static-date]:text-xs [&_.s2-static-date]:uppercase [&_.s2-static-date]:tracking-wide"
       >
+        {regionNote && <RegionPolicyNote />}
         {children}
       </div>
     </div>

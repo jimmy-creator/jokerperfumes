@@ -47,6 +47,18 @@ const Product = sequelize.define('Product', {
     type: DataTypes.DECIMAL(10, 3),
     allowNull: true,
   },
+  // India-region prices (dual-region store). `price`/`comparePrice` above are
+  // the Saudi/SAR base; these hold the INR values shown to India shoppers.
+  // Null falls back to the base price. Variant INR prices live inside the
+  // `variants` JSON as `priceInr` on each entry.
+  priceInr: {
+    type: DataTypes.DECIMAL(10, 3),
+    allowNull: true,
+  },
+  comparePriceInr: {
+    type: DataTypes.DECIMAL(10, 3),
+    allowNull: true,
+  },
   // Cost price for COGS / margin reporting (Phase D). Snapshotted into
   // Order.items at sale time so historical P&L is stable when cost
   // changes later.

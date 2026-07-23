@@ -8,6 +8,7 @@ import {
   deleteProduct,
 } from '../controllers/productController.js';
 import { protect, admin, requirePermission } from '../middleware/auth.js';
+import { getRegion, serializeProductForRegion } from '../utils/region.js';
 
 const router = Router();
 
@@ -65,12 +66,13 @@ router.get('/search-suggestions', async (req, res) => {
           { brand: { [Op.like]: `%${q}%` } },
         ],
       },
-      attributes: ['id', 'name', 'slug', 'price', 'category', 'images'],
+      attributes: ['id', 'name', 'slug', 'price', 'priceInr', 'category', 'images'],
       limit: 6,
       order: [['featured', 'DESC'], ['ratings', 'DESC']],
     });
 
-    res.json(products);
+    const region = getRegion(req);
+    res.json(products.map((p) => serializeProductForRegion(p, region)));
   } catch (error) {
     res.status(500).json([]);
   }
@@ -99,7 +101,8 @@ router.get('/:slug/related', async (req, res) => {
       order: [['ratings', 'DESC'], ['featured', 'DESC']],
     });
 
-    res.json(related);
+    const region = getRegion(req);
+    res.json(related.map((p) => serializeProductForRegion(p, region)));
   } catch (error) {
     res.status(500).json([]);
   }

@@ -6,6 +6,7 @@ import { calculateTax } from '../utils/tax.js';
 import { calculateShipping } from '../utils/shipping.js';
 import { autoCreateShipment } from '../services/shipping.js';
 import { resolveInfluencer, computeCommission } from '../services/referral.js';
+import { getRegion, pickPrice } from '../utils/region.js';
 
 const generateOrderNumber = () => {
   const prefix = 'ORD';
@@ -14,8 +15,8 @@ const generateOrderNumber = () => {
   return `${prefix}-${timestamp}-${random}`;
 };
 
-// Shared: build order items with variant support
-async function buildOrderItems(items) {
+// Shared: build order items with variant support (region-aware pricing)
+async function buildOrderItems(items, region = null) {
   const productIds = items.map((item) => item.productId);
   const products = await Product.findAll({
     where: { id: { [Op.in]: productIds } },
@@ -26,7 +27,7 @@ async function buildOrderItems(items) {
     const product = products.find((p) => p.id === item.productId);
     if (!product) throw new Error(`Product ${item.productId} not found`);
 
-    let price = parseFloat(product.price);
+    let price = pickPrice(product, region);
     let variantInfo = null;
 
     if (item.selectedVariant && product.variants && product.variants.length > 0) {
@@ -37,7 +38,10 @@ async function buildOrderItems(items) {
       if (variant.stock < item.quantity) {
         throw new Error(`${product.name} (${Object.values(item.selectedVariant).join(', ')}) is out of stock`);
       }
-      if (variant.price != null) price = parseFloat(variant.price);
+      // Region-specific variant override: only when the variant has an explicit
+      // price in the active region's currency.
+      const variantRegionPrice = region?.code === 'in' ? variant.priceInr : variant.price;
+      if (variantRegionPrice != null && variantRegionPrice !== '') price = parseFloat(variantRegionPrice);
       variantInfo = { ...item.selectedVariant, sku: variant.sku };
     } else if (product.variants && product.variants.length > 0 && !item.selectedVariant) {
       throw new Error(`Please select options for ${product.name}`);
@@ -148,7 +152,8 @@ export const createOrder = async (req, res) => {
       return res.status(400).json({ message: 'No items in order' });
     }
 
-    const { orderItems, totalAmount, products } = await buildOrderItems(items);
+    const region = getRegion(req);
+    const { orderItems, totalAmount, products } = await buildOrderItems(items, region);
     const { discount, code, influencerId: couponInfluencerId } = await applyCoupon(couponCode, totalAmount, req.user.id);
     const afterDiscount = Math.round((totalAmount - discount) * 100) / 100;
 
@@ -156,9 +161,9 @@ export const createOrder = async (req, res) => {
     const influencer = await resolveInfluencer({ referralCode, couponInfluencerId, buyerUserId: req.user.id, buyerEmail: req.user.email });
     const commissionAmount = influencer ? computeCommission(influencer, afterDiscount) : 0;
 
-    const { totalTax, breakdown } = calculateTax(orderItems);
+    const { totalTax, breakdown } = calculateTax(orderItems, region);
 
-    const shippingResult = calculateShipping(afterDiscount, orderItems.length, shippingAddress?.state);
+    const shippingResult = calculateShipping(afterDiscount, orderItems.length, shippingAddress?.state, region);
     const shippingCharge = shippingResult[shippingMethod]?.rate || shippingResult.standard.rate;
 
     const finalAmount = Math.round((afterDiscount + shippingCharge) * 100) / 100;
@@ -174,6 +179,8 @@ export const createOrder = async (req, res) => {
       shippingMethod,
       couponCode: code,
       discount,
+      region: region.code,
+      currencyCode: region.currencyCode,
       influencerId: influencer ? influencer.id : null,
       referralCode: influencer ? influencer.referralCode : null,
       referralCampaign: influencer ? (referralCampaign || null) : null,
@@ -215,7 +222,8 @@ export const createGuestOrder = async (req, res) => {
       return res.status(400).json({ message: 'Shipping address with name, address, and phone is required' });
     }
 
-    const { orderItems, totalAmount, products } = await buildOrderItems(items);
+    const region = getRegion(req);
+    const { orderItems, totalAmount, products } = await buildOrderItems(items, region);
     const { discount, code, influencerId: couponInfluencerId } = await applyCoupon(couponCode, totalAmount, null, guestEmail);
     const afterDiscount = Math.round((totalAmount - discount) * 100) / 100;
 
@@ -223,9 +231,9 @@ export const createGuestOrder = async (req, res) => {
     const influencer = await resolveInfluencer({ referralCode, couponInfluencerId, buyerUserId: null, buyerEmail: guestEmail });
     const commissionAmount = influencer ? computeCommission(influencer, afterDiscount) : 0;
 
-    const { totalTax, breakdown } = calculateTax(orderItems);
+    const { totalTax, breakdown } = calculateTax(orderItems, region);
 
-    const shippingResult = calculateShipping(afterDiscount, orderItems.length, shippingAddress?.state);
+    const shippingResult = calculateShipping(afterDiscount, orderItems.length, shippingAddress?.state, region);
     const shippingCharge = shippingResult[shippingMethod]?.rate || shippingResult.standard.rate;
 
     const finalAmount = Math.round((afterDiscount + shippingCharge) * 100) / 100;
@@ -242,6 +250,8 @@ export const createGuestOrder = async (req, res) => {
       shippingMethod,
       couponCode: code,
       discount,
+      region: region.code,
+      currencyCode: region.currencyCode,
       influencerId: influencer ? influencer.id : null,
       referralCode: influencer ? influencer.referralCode : null,
       referralCampaign: influencer ? (referralCampaign || null) : null,

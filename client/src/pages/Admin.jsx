@@ -33,7 +33,7 @@ const MULTILOC_ENABLED = import.meta.env.VITE_FEATURE_MULTILOC === 'true';
 
 const emptyProduct = {
   name: '', nameAr: '', code: '', description: '', descriptionAr: '',
-  price: '', comparePrice: '', costPrice: '',
+  price: '', comparePrice: '', costPrice: '', priceInr: '', comparePriceInr: '',
   category: '', categories: [], brand: '', stock: '', featured: false, images: [],
   variantOptions: null, variants: null,
 };
@@ -205,7 +205,8 @@ function VariantEditor({ variantOptions, variants, onChange, basePrice }) {
                     <tr style={{ background: 'var(--bg-warm)' }}>
                       <th style={{ padding: '0.5rem', textAlign: 'left', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.5px', color: 'var(--text-secondary)' }}>Variant</th>
                       <th style={{ padding: '0.5rem', textAlign: 'left', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.5px', color: 'var(--text-secondary)' }}>SKU</th>
-                      <th style={{ padding: '0.5rem', textAlign: 'left', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.5px', color: 'var(--text-secondary)' }}>Price Override</th>
+                      <th style={{ padding: '0.5rem', textAlign: 'left', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.5px', color: 'var(--text-secondary)' }}>Price (SAR)</th>
+                      <th style={{ padding: '0.5rem', textAlign: 'left', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.5px', color: 'var(--text-secondary)' }}>Price (INR)</th>
                       <th style={{ padding: '0.5rem', textAlign: 'left', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.5px', color: 'var(--text-secondary)' }}>Stock</th>
                     </tr>
                   </thead>
@@ -226,10 +227,20 @@ function VariantEditor({ variantOptions, variants, onChange, basePrice }) {
                         <td style={{ padding: '0.4rem 0.5rem' }}>
                           <input
                             type="number"
-                            step={PRICE_STEP}
+                            step="0.01"
                             value={v.price ?? ''}
                             onChange={(e) => handleVariantFieldChange(i, 'price', e.target.value)}
-                            placeholder="Base price"
+                            placeholder="SAR"
+                            style={{ padding: '0.35rem 0.5rem', border: '1px solid var(--border)', borderRadius: 'var(--radius)', fontSize: '0.82rem', width: '90px' }}
+                          />
+                        </td>
+                        <td style={{ padding: '0.4rem 0.5rem' }}>
+                          <input
+                            type="number"
+                            step="0.01"
+                            value={v.priceInr ?? ''}
+                            onChange={(e) => handleVariantFieldChange(i, 'priceInr', e.target.value)}
+                            placeholder="INR ₹"
                             style={{ padding: '0.35rem 0.5rem', border: '1px solid var(--border)', borderRadius: 'var(--radius)', fontSize: '0.82rem', width: '90px' }}
                           />
                         </td>
@@ -1558,6 +1569,12 @@ export default function Admin() {
     }
     try {
       const payload = { ...form, categories: cats, category: cats[0] };
+      // Empty India prices → null so they fall back to the SAR base rather than ₹0.
+      if (payload.priceInr === '') payload.priceInr = null;
+      if (payload.comparePriceInr === '') payload.comparePriceInr = null;
+      if (Array.isArray(payload.variants)) {
+        payload.variants = payload.variants.map((v) => ({ ...v, priceInr: v.priceInr === '' ? null : v.priceInr }));
+      }
       if (editing) {
         await api.put(`/products/${editing}`, payload);
         toast.success('Product updated');
@@ -1945,12 +1962,20 @@ export default function Admin() {
 
                   <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                     <div className="flex flex-col gap-2">
-                      <Label>Price</Label>
-                      <Input type="number" step={PRICE_STEP} value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} required />
+                      <Label>Price (SAR)</Label>
+                      <Input type="number" step="0.01" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} required />
                     </div>
                     <div className="flex flex-col gap-2">
-                      <Label>Compare Price</Label>
-                      <Input type="number" step={PRICE_STEP} value={form.comparePrice} onChange={(e) => setForm({ ...form, comparePrice: e.target.value })} />
+                      <Label>Compare (SAR)</Label>
+                      <Input type="number" step="0.01" value={form.comparePrice} onChange={(e) => setForm({ ...form, comparePrice: e.target.value })} />
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      <Label>Price (INR ₹)</Label>
+                      <Input type="number" step="0.01" value={form.priceInr ?? ''} onChange={(e) => setForm({ ...form, priceInr: e.target.value })} placeholder="India price" />
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      <Label>Compare (INR ₹)</Label>
+                      <Input type="number" step="0.01" value={form.comparePriceInr ?? ''} onChange={(e) => setForm({ ...form, comparePriceInr: e.target.value })} />
                     </div>
                     <div className="flex flex-col gap-2">
                       <Label>Cost Price</Label>

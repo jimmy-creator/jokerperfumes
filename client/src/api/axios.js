@@ -1,8 +1,16 @@
 import axios from 'axios';
+import { getRegionCode } from '../utils/region';
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || '/api',
   withCredentials: true,
+});
+
+// Tell the server which region the shopper is in, so it returns region-priced
+// products and region-appropriate payment gateways.
+api.interceptors.request.use((config) => {
+  config.headers['X-Region'] = getRegionCode();
+  return config;
 });
 
 // No Bearer token — authentication is via httpOnly cookie only

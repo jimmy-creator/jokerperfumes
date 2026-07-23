@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { formatPrice, CurrencySymbol } from '../utils/currency';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
+import { useRegion } from '../context/RegionContext';
 import { ShieldCheck, Lock, User, X } from 'lucide-react';
 import api from '../api/axios';
 import { getRef, getCampaign } from '../utils/referral';
@@ -38,17 +39,14 @@ function loadScript(src) {
   });
 }
 
-// The store ships within Qatar — popular cities suggested in the address combobox
-// (customers can also type any city not listed).
-const QATAR_CITIES = [
-  'Doha', 'Al Rayyan', 'Al Wakrah', 'Al Khor', 'Al Wukair', 'Umm Salal',
-  'Al Daayen', 'Lusail', 'Mesaieed', 'Dukhan', 'Al Shamal', 'Al Shahaniya',
-];
-
 export default function Checkout() {
   const { t } = useTranslation();
   const { cart, cartTotal, clearCart } = useCart();
   const { user } = useAuth();
+  const { region } = useRegion();
+  const isIndia = region.addressMode === 'in';
+  const regionCities = region.cities || [];
+  const regionStates = region.states || [];
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [paymentMethods, setPaymentMethods] = useState([]);
@@ -76,7 +74,8 @@ export default function Checkout() {
     address: '',
     city: '',
     state: '',
-    country: 'Qatar',
+    pincode: '',
+    country: region.name,
     phone: user?.phone || '',
     paymentMethod: 'cod',
   });
@@ -130,7 +129,7 @@ export default function Checkout() {
 
   const getShippingAddress = () => ({
     fullName: form.fullName, address: form.address,
-    city: form.city, state: form.state,
+    city: form.city, state: form.state, pincode: form.pincode,
     country: form.country, phone: form.phone,
   });
 
@@ -595,26 +594,63 @@ export default function Checkout() {
                   required
                 />
               </div>
-              <div className="flex flex-col gap-2">
-                <Label htmlFor="city">{t('checkout.city', { defaultValue: 'City' })}</Label>
-                <Input
-                  id="city"
-                  name="city"
-                  list="qatar-cities"
-                  value={form.city}
-                  onChange={(e) => setForm((f) => ({ ...f, city: e.target.value, state: e.target.value }))}
-                  placeholder={t('checkout.cityPlaceholder')}
-                  autoComplete="off"
-                  required
-                />
-                <datalist id="qatar-cities">
-                  {QATAR_CITIES.map((c) => <option key={c} value={c} />)}
-                </datalist>
-              </div>
-              <div className="flex flex-col gap-2">
-                <Label htmlFor="phone">{t('checkout.phone')}</Label>
-                <Input id="phone" name="phone" value={form.phone} onChange={handleChange} required />
-              </div>
+              {isIndia ? (
+                <>
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <div className="flex flex-col gap-2">
+                      <Label htmlFor="state">{t('checkout.state', { defaultValue: 'State' })}</Label>
+                      <select
+                        id="state"
+                        name="state"
+                        value={form.state}
+                        onChange={(e) => setForm((f) => ({ ...f, state: e.target.value }))}
+                        required
+                        className="h-9 rounded-md border border-input bg-background px-3 text-sm outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/40"
+                      >
+                        <option value="" disabled>Select state</option>
+                        {regionStates.map((s) => <option key={s} value={s}>{s}</option>)}
+                      </select>
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      <Label htmlFor="city">{t('checkout.city', { defaultValue: 'City' })}</Label>
+                      <Input id="city" name="city" value={form.city} onChange={handleChange} required />
+                    </div>
+                  </div>
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <div className="flex flex-col gap-2">
+                      <Label htmlFor="pincode">{t('checkout.pincode', { defaultValue: 'PIN code' })}</Label>
+                      <Input id="pincode" name="pincode" value={form.pincode} onChange={handleChange} inputMode="numeric" placeholder="6-digit PIN" required />
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      <Label htmlFor="phone">{t('checkout.phone')}</Label>
+                      <Input id="phone" name="phone" value={form.phone} onChange={handleChange} placeholder={region.phoneCode} required />
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="flex flex-col gap-2">
+                    <Label htmlFor="city">{t('checkout.city', { defaultValue: 'City' })}</Label>
+                    <Input
+                      id="city"
+                      name="city"
+                      list="region-cities"
+                      value={form.city}
+                      onChange={(e) => setForm((f) => ({ ...f, city: e.target.value, state: e.target.value }))}
+                      placeholder={t('checkout.cityPlaceholder')}
+                      autoComplete="off"
+                      required
+                    />
+                    <datalist id="region-cities">
+                      {regionCities.map((c) => <option key={c} value={c} />)}
+                    </datalist>
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <Label htmlFor="phone">{t('checkout.phone')}</Label>
+                    <Input id="phone" name="phone" value={form.phone} onChange={handleChange} placeholder={region.phoneCode} required />
+                  </div>
+                </>
+              )}
             </div>
           </section>
 

@@ -8,6 +8,7 @@ import { Op } from 'sequelize';
 import { calculateTax } from '../utils/tax.js';
 import { calculateShipping } from '../utils/shipping.js';
 import { resolveInfluencer, computeCommission } from '../services/referral.js';
+import { getRegion, pickPrice, REGION_CONFIG } from '../utils/region.js';
 
 // Reuse coupon logic
 async function applyCouponForPayment(couponCode, subtotal, userId, orderItems = [], paymentMethod = null) {
@@ -88,17 +89,19 @@ async function reduceOrderStock(items) {
 
 const router = Router();
 
-// Get available payment gateways
+// Get available payment gateways (filtered to the shopper's region)
 router.get('/gateways', (req, res) => {
-  const gateways = getAvailableGateways();
+  const region = getRegion(req);
+  const allowed = new Set(region.gateways); // e.g. Saudi: tap/tamara/cod/bank_transfer, India: razorpay/cod
+  const gateways = getAvailableGateways().filter((g) => allowed.has(g.id));
   const allMethods = [];
 
   const disabledMethods = (process.env.DISABLED_PAYMENT_METHODS || '').split(',').map(m => m.trim().toLowerCase());
 
-  if (!disabledMethods.includes('cod')) {
+  if (allowed.has('cod') && !disabledMethods.includes('cod')) {
     allMethods.push({ id: 'cod', name: 'Cash on Delivery', description: 'Pay when you receive your order' });
   }
-  if (!disabledMethods.includes('bank_transfer')) {
+  if (allowed.has('bank_transfer') && !disabledMethods.includes('bank_transfer')) {
     allMethods.push({ id: 'bank_transfer', name: 'Bank Transfer', description: 'Direct bank transfer' });
   }
 
@@ -149,6 +152,7 @@ router.post('/create-order', optionalAuth, async (req, res) => {
   try {
     const { items, shippingAddress, gateway = process.env.PAYMENT_GATEWAY || 'razorpay', guestEmail, couponCode, referralCode, referralCampaign } = req.body;
     const isGuest = !req.user;
+    const region = getRegion(req);
 
     if (!items || items.length === 0) {
       return res.status(400).json({ message: 'No items provided' });
@@ -171,7 +175,8 @@ router.post('/create-order', optionalAuth, async (req, res) => {
 
       // Resolve the selected variant's price/stock — base price would otherwise
       // bill a "6 Pack" as a "1 Pack" (matches orderController.buildOrderItems).
-      let price = parseFloat(product.price);
+      // Prices are region-aware (Saudi base vs India priceInr).
+      let price = pickPrice(product, region);
       let variantInfo = null;
 
       if (item.selectedVariant && product.variants && product.variants.length > 0) {
@@ -182,7 +187,8 @@ router.post('/create-order', optionalAuth, async (req, res) => {
         if (variant.stock < item.quantity) {
           throw new Error(`${product.name} (${Object.values(item.selectedVariant).join(', ')}) is out of stock`);
         }
-        if (variant.price != null) price = parseFloat(variant.price);
+        const variantRegionPrice = region?.code === 'in' ? variant.priceInr : variant.price;
+        if (variantRegionPrice != null && variantRegionPrice !== '') price = parseFloat(variantRegionPrice);
         variantInfo = { ...item.selectedVariant, sku: variant.sku };
       } else if (product.variants && product.variants.length > 0 && !item.selectedVariant) {
         throw new Error(`Please select options for ${product.name}`);
@@ -221,11 +227,11 @@ router.post('/create-order', optionalAuth, async (req, res) => {
     const commissionAmount = influencer ? computeCommission(influencer, afterDiscount) : 0;
 
     // Calculate tax
-    const { totalTax, breakdown: taxBreakdown } = calculateTax(orderItems);
+    const { totalTax, breakdown: taxBreakdown } = calculateTax(orderItems, region);
 
     // Calculate shipping
     const shippingMethod = req.body.shippingMethod || 'standard';
-    const shippingResult = calculateShipping(afterDiscount, orderItems.length, shippingAddress?.state);
+    const shippingResult = calculateShipping(afterDiscount, orderItems.length, shippingAddress?.state, region);
     const shipping = shippingResult[shippingMethod]?.rate || shippingResult.standard.rate;
     // Tax is inclusive — not added on top
     const finalAmount = Math.round((afterDiscount + shipping) * 100) / 100;
@@ -248,6 +254,8 @@ router.post('/create-order', optionalAuth, async (req, res) => {
       shippingMethod,
       couponCode: appliedCode,
       discount,
+      region: region.code,
+      currencyCode: region.currencyCode,
       influencerId: influencer ? influencer.id : null,
       referralCode: influencer ? influencer.referralCode : null,
       referralCampaign: influencer ? (referralCampaign || null) : null,
@@ -264,7 +272,7 @@ router.post('/create-order', optionalAuth, async (req, res) => {
 
     // Create gateway payment order
     const paymentGateway = getPaymentGateway(gateway);
-    const currencyCode = process.env.CURRENCY_CODE || 'INR';
+    const currencyCode = region.currencyCode || process.env.CURRENCY_CODE || 'SAR';
     const gatewayOrder = await paymentGateway.createOrder(
       finalAmount,
       currencyCode,

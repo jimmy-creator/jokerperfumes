@@ -160,6 +160,7 @@ export default function RefundPolicy() {
       titleAr="سياسة استرداد المبالغ"
       description="Elegant Bayt refund policy. Returns accepted within 14 days on unused items in original packaging."
       descriptionAr="سياسة استرداد المبالغ لدى Elegant Bayt. نقبل الإرجاع خلال 14 يومًا للمنتجات غير المستعملة في تغليفها الأصلي."
+      regionNote
     >
       {isAr ? <ArabicBody /> : <EnglishBody />}
     </StaticPage>

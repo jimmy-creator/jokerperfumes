@@ -192,6 +192,7 @@ export default function ShippingPolicy() {
       titleAr="سياسة الشحن"
       description="Elegant Bayt delivery across Qatar. Free over a minimum order, fast delivery to most areas."
       descriptionAr="توصيل Elegant Bayt في جميع أنحاء قطر. توصيل مجاني فوق الحد الأدنى للطلب، وتوصيل سريع لمعظم المناطق."
+      regionNote
     >
       {isAr ? <ArabicBody /> : <EnglishBody />}
     </StaticPage>

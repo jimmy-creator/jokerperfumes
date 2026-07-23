@@ -1,6 +1,7 @@
 import { Op } from 'sequelize';
 import sequelize from '../config/database.js';
 import { Product } from '../models/index.js';
+import { getRegion, serializeProductForRegion } from '../utils/region.js';
 
 export const getProducts = async (req, res) => {
   try {
@@ -54,8 +55,9 @@ export const getProducts = async (req, res) => {
       order: [[sort, order.toUpperCase()]],
     });
 
+    const region = getRegion(req);
     res.json({
-      products: rows,
+      products: rows.map((p) => serializeProductForRegion(p, region)),
       totalPages: Math.ceil(count / limit),
       currentPage: parseInt(page),
       total: count,
@@ -75,7 +77,7 @@ export const getProduct = async (req, res) => {
       return res.status(404).json({ message: 'Product not found' });
     }
 
-    res.json(product);
+    res.json(serializeProductForRegion(product, getRegion(req)));
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

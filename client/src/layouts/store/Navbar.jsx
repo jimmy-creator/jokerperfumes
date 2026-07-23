@@ -6,6 +6,7 @@ import { useCart } from '../../context/CartContext';
 import { useWishlist } from '../../context/WishlistContext';
 import { useTranslation } from 'react-i18next';
 import LanguageSwitcher from '../../components/LanguageSwitcher';
+import RegionSwitcher from '../../components/RegionSwitcher';
 import api from '../../api/axios';
 import ScrollToTopButton from '../../components/ScrollToTopButton';
 import ProductImage from '../../components/ProductImage';
@@ -324,6 +325,7 @@ export default function Navbar() {
 
           {/* Actions */}
           <div className="ml-auto flex shrink-0 items-center gap-0.5 sm:gap-1">
+            <RegionSwitcher />
             <LanguageSwitcher compact />
             <Button
               type="button"

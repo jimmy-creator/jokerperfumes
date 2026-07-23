@@ -208,6 +208,7 @@ export default function TermsOfService() {
       titleAr="شروط الخدمة"
       description="Terms and conditions for using the Elegant Bayt website and services."
       descriptionAr="الشروط والأحكام لاستخدام موقع Elegant Bayt وخدماتنا."
+      regionNote
     >
       {isAr ? <ArabicBody /> : <EnglishBody />}
     </StaticPage>

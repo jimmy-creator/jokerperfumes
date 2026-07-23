@@ -1,11 +1,14 @@
 // Shipping rate calculation
 // Configurable via .env — defaults provided
 
-export function calculateShipping(subtotal, itemCount, shippingState) {
-  const freeThreshold = parseFloat(process.env.SHIPPING_FREE_ABOVE || '500');
-  const flatRate = parseFloat(process.env.SHIPPING_FLAT_RATE || '49');
-  const perItemRate = parseFloat(process.env.SHIPPING_PER_ITEM || '0');
-  const expressRate = parseFloat(process.env.SHIPPING_EXPRESS_RATE || '99');
+export function calculateShipping(subtotal, itemCount, shippingState, region = null) {
+  // Dual-region: when a region is passed, use its shipping config (thresholds
+  // and rates are currency-specific). Otherwise fall back to the global env.
+  const cfg = region?.shipping || {};
+  const freeThreshold = cfg.freeAbove != null ? cfg.freeAbove : parseFloat(process.env.SHIPPING_FREE_ABOVE || '500');
+  const flatRate = cfg.flat != null ? cfg.flat : parseFloat(process.env.SHIPPING_FLAT_RATE || '49');
+  const perItemRate = cfg.perItem != null ? cfg.perItem : parseFloat(process.env.SHIPPING_PER_ITEM || '0');
+  const expressRate = cfg.express != null ? cfg.express : parseFloat(process.env.SHIPPING_EXPRESS_RATE || '99');
 
   // Free shipping above threshold
   if (subtotal >= freeThreshold) {

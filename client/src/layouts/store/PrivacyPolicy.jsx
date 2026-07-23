@@ -192,6 +192,7 @@ export default function PrivacyPolicy() {
       titleAr="سياسة الخصوصية"
       description="Privacy Policy for Elegant Bayt. How we collect, use, and protect your personal information."
       descriptionAr="سياسة الخصوصية لـ Elegant Bayt. كيف نقوم بجمع معلوماتك الشخصية واستخدامها وحمايتها."
+      regionNote
     >
       {isAr ? <ArabicBody /> : <EnglishBody />}
     </StaticPage>
