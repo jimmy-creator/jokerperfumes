@@ -28,7 +28,7 @@ let STORE_NAME = '';
 let DEFAULT_OG = '';
 let DEFAULT_DESC = '';
 
-const CURRENCY_CODE = process.env.CURRENCY_CODE || 'QAR';
+const CURRENCY_CODE = process.env.CURRENCY_CODE || 'SAR';
 const I18N_ON = process.env.FEATURE_I18N === 'true';
 const CACHE_TTL_MS = 5 * 60 * 1000;
 const cache = new Map();   // url → { html, ts }
@@ -117,7 +117,7 @@ function renderHtml({ title, description, image, url, type = 'website', jsonLd =
     .replace(/<meta name="twitter:description" content="[^"]*"\s*\/?>/, `<meta name="twitter:description" content="${d}" />`)
     .replace(/<meta name="twitter:image" content="[^"]*"\s*\/?>/, `<meta name="twitter:image" content="${i}" />`)
     // og:locale follows the page locale so Facebook/LinkedIn pick the right one.
-    .replace(/<meta property="og:locale" content="[^"]*"\s*\/?>/, `<meta property="og:locale" content="${locale === 'ar' ? 'ar_QA' : 'en_US'}" />`);
+    .replace(/<meta property="og:locale" content="[^"]*"\s*\/?>/, `<meta property="og:locale" content="${locale === 'ar' ? 'ar_SA' : 'en_US'}" />`);
 
   // hreflang alternates — emitted next to canonical so crawlers see them.
   if (alternates) {

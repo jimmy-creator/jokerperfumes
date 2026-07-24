@@ -5,7 +5,7 @@ const SITE_NAME = import.meta.env.VITE_STORE_NAME || 'Joker Perfumes';
 const DEFAULT_DESC = import.meta.env.VITE_STORE_DESC || `Shop the latest products at great prices. Free shipping on orders over ${CURRENCY}500.`;
 const SITE_URL = typeof window !== 'undefined' ? window.location.origin : (import.meta.env.VITE_SITE_URL || '');
 const OG_IMAGE = import.meta.env.VITE_OG_IMAGE || '/images/hero-banner.jpeg';
-const CURRENCY_CODE = import.meta.env.VITE_CURRENCY_CODE || 'QAR';
+const CURRENCY_CODE = import.meta.env.VITE_CURRENCY_CODE || 'SAR';
 
 const cleanCanonical = () => {
   if (typeof window === 'undefined') return SITE_URL;

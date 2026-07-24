@@ -104,6 +104,10 @@ Disallow: /orders
 Disallow: /cart
 Disallow: /wishlist
 Disallow: /order-success
+Disallow: /login
+Disallow: /register
+Disallow: /forgot-password
+Disallow: /reset-password
 
 Sitemap: ${baseUrl}/sitemap.xml
 `;
