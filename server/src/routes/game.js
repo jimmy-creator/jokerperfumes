@@ -66,9 +66,14 @@ router.get('/puzzle/state', optionalAuth, async (req, res) => {
       claimed = rewards
         .map((r) => {
           const c = byCode[r.couponCode];
+          if (!c) return null;
+          // `used` = the reward coupon has already been redeemed (usage
+          // exhausted). Kept in the list so the level still reads as solved;
+          // the client hides used ones from the visible coupon list.
+          const used = c.usageLimit != null && c.usedCount >= c.usageLimit;
           // Use the coupon's own minted value so existing rewards keep their
           // discount even if the admin later changes the level's percentage.
-          return c ? { level: r.level, ...couponView(c, null) } : null;
+          return { level: r.level, used, ...couponView(c, null) };
         })
         .filter(Boolean)
         .sort((a, b) => a.level - b.level);

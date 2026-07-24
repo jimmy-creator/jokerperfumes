@@ -4,12 +4,12 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-// Brand mark (the Joker circle emblem used in the browser tab). Falls back to
-// text-only header if the file is missing on the deploy target.
-const LOGO_PATH = path.resolve(__dirname, '../../../client/public/images/joker/logo-circle.png');
+// Full Joker logo (medallion + wordmark). Falls back to a text-only header if
+// the file is missing on the deploy target.
+const LOGO_PATH = path.resolve(__dirname, '../../../client/public/images/joker/logo-full.png');
 
 const storeName = process.env.STORE_NAME || 'ShopHub';
-const storeTagline = process.env.STORE_TAGLINE || 'Elegance at Home';
+const storeTagline = process.env.STORE_TAGLINE || 'Luxury Fragrances';
 const storeEmail = process.env.SMTP_EMAIL || '';
 const storeTRN = process.env.STORE_TRN || process.env.STORE_GSTIN || '';
 const storeAddress = process.env.STORE_ADDRESS || '';
@@ -43,51 +43,45 @@ export function generateInvoice(order) {
       const taxAmount = parseFloat(order.taxAmount) || 0;
       const totalAmount = parseFloat(order.totalAmount);
 
-      // Colors — Elegant Bayt brand (matches the storefront elegantBayt theme)
-      const dark = '#16264d';       // navy (--copper)
-      const copper = '#c6a24c';     // gold (--gold)
-      const grey = '#5b6478';       // --text-secondary
-      const lightGrey = '#e5e7eb';  // --border
-      const bg = '#f5f6f9';         // --bg-warm
-      const success = '#10b981';    // --success
+      // Colors — Joker Perfumes brand (black / gold / circus red, matches the storefront jokerPerfumes theme)
+      const dark = '#111111';        // brand black (--bg-dark / --text)
+      const copper = '#b8892a';      // gold accent, readable on white (--copper)
+      const goldBright = '#fccd41';  // bright gold for accents on the black band (--gold)
+      const grey = '#5a5348';        // --text-secondary
+      const lightGrey = '#e5ded0';   // --border
+      const bg = '#f9f0dc';          // --bg-warm (warm cream)
+      const success = '#3d8b5f';     // --success
 
-      // ===== HEADER (navy band, monogram + two-tone wordmark + tagline) =====
-      doc.rect(0, 0, 595.28, 100).fill(dark);
+      // ===== HEADER (black band, full Joker logo + INVOICE) =====
+      const bandH = 120;
+      doc.rect(0, 0, 595.28, bandH).fill(dark);
 
-      let brandX = 50;
+      // Full stacked Joker logo (medallion + wordmark) directly on the black
+      // band — no white tile, since the footer logo is built for a dark backdrop.
       if (fs.existsSync(LOGO_PATH)) {
-        // Monogram sits in a white rounded tile, like the navbar.
-        doc.roundedRect(50, 26, 48, 48, 8).fill('#ffffff');
-        doc.image(LOGO_PATH, 55, 31, { fit: [38, 38], align: 'center', valign: 'center' });
-        brandX = 112;
+        const logoH = 84;
+        const logoW = logoH * (1189 / 1032); // preserve the logo's aspect ratio
+        doc.image(LOGO_PATH, 50, (bandH - logoH) / 2, { fit: [logoW, logoH], align: 'center', valign: 'center' });
+      } else {
+        doc.fontSize(22).font('Helvetica-Bold').fill('#ffffff')
+          .text(storeName.toUpperCase(), 50, 46, { characterSpacing: 2 });
       }
 
-      // Two-tone wordmark: first word white, rest gold (ELEGANT BAYT).
-      const words = storeName.toUpperCase().split(' ');
-      const firstWord = words.shift();
-      const restWords = words.join(' ');
-      doc.fontSize(20).font('Helvetica-Bold').fill('#ffffff')
-        .text(firstWord + (restWords ? ' ' : ''), brandX, 36, { characterSpacing: 2, continued: !!restWords });
-      if (restWords) doc.fill(copper).text(restWords, { characterSpacing: 2 });
+      doc.fontSize(24).fill(goldBright).font('Helvetica-Bold')
+        .text('INVOICE', 400, 34, { width: 145, align: 'right' });
 
-      doc.fontSize(7).fill('#8fa0c9').font('Helvetica-Bold')
-        .text(storeTagline.toUpperCase(), brandX, 60, { characterSpacing: 3 });
+      doc.fontSize(9).fill('#b3ab98')
+        .text(`#${order.orderNumber}`, 400, 64, { width: 145, align: 'right' });
 
-      doc.fontSize(24).fill(copper).font('Helvetica-Bold')
-        .text('INVOICE', 400, 30, { width: 150, align: 'right' });
-
-      doc.fontSize(9).fill('#aab4cd')
-        .text(`#${order.orderNumber}`, 400, 58, { width: 150, align: 'right' });
-
-      doc.fontSize(9).fill('#aab4cd')
-        .text(new Date(order.createdAt).toLocaleDateString('en-QA', {
+      doc.fontSize(9).fill('#b3ab98')
+        .text(new Date(order.createdAt).toLocaleDateString('en-GB', {
           day: 'numeric', month: 'long', year: 'numeric',
-        }), 400, 72, { width: 150, align: 'right' });
+        }), 400, 80, { width: 145, align: 'right' });
 
       // Thin gold rule under the header band.
-      doc.rect(0, 100, 595.28, 3).fill(copper);
+      doc.rect(0, bandH, 595.28, 3).fill(goldBright);
 
-      let y = 120;
+      let y = 140;
 
       // ===== STORE & CUSTOMER INFO =====
       // From (Store)
@@ -104,7 +98,7 @@ export function generateInvoice(order) {
       if (storeTRN) { doc.text(`TRN: ${storeTRN}`, 50, y); y += 12; }
 
       // To (Customer)
-      let yRight = 120;
+      let yRight = 140;
       doc.fontSize(8).fill(copper).font('Helvetica-Bold')
         .text('BILL TO', 350, yRight);
       yRight += 14;
@@ -131,7 +125,7 @@ export function generateInvoice(order) {
       y += 28;
       doc.fontSize(9).fill(dark).font('Helvetica');
       doc.text(order.orderNumber, 60, y + 6);
-      doc.text(new Date(order.createdAt).toLocaleDateString('en-QA'), 200, y + 6);
+      doc.text(new Date(order.createdAt).toLocaleDateString('en-GB'), 200, y + 6);
       doc.text((order.paymentMethod || 'N/A').toUpperCase(), 310, y + 6);
 
       const statusText = (order.paymentStatus || 'pending').toUpperCase();

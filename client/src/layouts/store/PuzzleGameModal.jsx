@@ -69,6 +69,8 @@ export default function PuzzleGameModal({ open, onClose }) {
 
   const current = data.levels.find((l) => l.level === level);
   const solved = solvedSet(data.claimed, guest);
+  // Reward coupons still worth showing — hide any that have already been redeemed.
+  const unusedClaimed = data.claimed.filter((c) => !c.used).sort((a, b) => a.level - b.level);
 
   const submit = async () => {
     if (!guess.trim() || busy) return;
@@ -218,12 +220,14 @@ export default function PuzzleGameModal({ open, onClose }) {
               {t('game.allSolved')}
             </h2>
             {user ? (
-              <div className="mt-5 flex flex-col gap-2">
-                <p className="font-fell text-base text-white/70">{t('game.rewardsApply')}</p>
-                {data.claimed.sort((a, b) => a.level - b.level).map((c) => (
-                  <CouponCode key={c.level} code={c.code} label={t('game.percentOff', { value: c.value })} />
-                ))}
-              </div>
+              unusedClaimed.length > 0 ? (
+                <div className="mt-5 flex flex-col gap-2">
+                  <p className="font-fell text-base text-white/70">{t('game.rewardsApply')}</p>
+                  {unusedClaimed.map((c) => (
+                    <CouponCode key={c.level} code={c.code} label={t('game.percentOff', { value: c.value })} />
+                  ))}
+                </div>
+              ) : null
             ) : (
               <>
                 <p className="font-fell mt-3 text-base text-white/70">
