@@ -25,8 +25,16 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
 
   // Already signed in — never show the login page to authenticated users
-  // (back button, manual URL, etc.); send them home instead.
-  if (user) return <Navigate to="/" replace />;
+  // (back button, manual URL, or the re-render right after login). Staff land on
+  // the admin panel, influencers on their dashboard, everyone else home.
+  if (user) {
+    const dest = user.role === 'admin' || user.role === 'staff'
+      ? '/admin'
+      : user.role === 'influencer'
+        ? '/influencer/dashboard'
+        : '/';
+    return <Navigate to={dest} replace />;
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault();
