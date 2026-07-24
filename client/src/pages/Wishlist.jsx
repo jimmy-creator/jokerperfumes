@@ -68,7 +68,7 @@ export default function Wishlist() {
                   variant="ghost"
                   className="text-muted-foreground hover:text-destructive"
                   onClick={() => { removeFromWishlist(item.id); showToast(t('wishlist.removed')); }}
-                  aria-label="Remove"
+                  aria-label={t('cart.remove')}
                 >
                   <Trash2 className="size-4" />
                 </Button>

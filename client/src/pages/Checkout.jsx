@@ -150,9 +150,9 @@ export default function Checkout() {
       setCouponCode(code);
       setCouponError('');
       setShowCoupons(false);
-      toast.success(`Coupon applied: ${data.description}`, toastStyle);
+      toast.success(t('checkout.couponApplied', { description: data.description }), toastStyle);
     } catch (error) {
-      setCouponError(error.response?.data?.message || 'Invalid coupon');
+      setCouponError(error.response?.data?.message || t('checkout.invalidCoupon'));
       setCouponApplied(null);
     } finally {
       setCouponLoading(false);
@@ -219,7 +219,7 @@ export default function Checkout() {
   const handleRazorpayPayment = async () => {
     const loaded = await loadScript('https://checkout.razorpay.com/v1/checkout.js');
     if (!loaded) {
-      toast.error('Failed to load Razorpay. Check your internet connection.');
+      toast.error(t('checkout.razorpayLoadFailed'));
       return;
     }
 
@@ -280,7 +280,7 @@ export default function Checkout() {
       modal: {
         confirm_close: true,
         ondismiss: function () {
-          toast.error('Payment cancelled', toastStyle);
+          toast.error(t('checkout.paymentCancelled'), toastStyle);
           setLoading(false);
         },
       },
@@ -289,7 +289,7 @@ export default function Checkout() {
     const rzp = new window.Razorpay(options);
     rzp.on('payment.failed', function (response) {
       console.error('Razorpay payment failed:', response.error);
-      toast.error(response.error.description || 'Payment failed', toastStyle);
+      toast.error(response.error.description || t('checkout.paymentFailed'), toastStyle);
       setLoading(false);
     });
     processingPayment.current = true;
@@ -314,7 +314,7 @@ export default function Checkout() {
       // — not here — so an abandoned/failed online payment keeps the cart intact.
       window.location.href = data.payment.sessionUrl;
     } else {
-      toast.error('Failed to create Stripe checkout session');
+      toast.error(t('checkout.sessionFailed', { gateway: 'Stripe' }));
     }
   };
 
@@ -336,7 +336,7 @@ export default function Checkout() {
       // — not here — so an abandoned/failed online payment keeps the cart intact.
       window.location.href = data.payment.sessionUrl;
     } else {
-      toast.error('Failed to create Nomod checkout session');
+      toast.error(t('checkout.sessionFailed', { gateway: 'Nomod' }));
     }
   };
 
@@ -358,7 +358,7 @@ export default function Checkout() {
       // — not here — so an abandoned/failed online payment keeps the cart intact.
       window.location.href = data.payment.sessionUrl;
     } else {
-      toast.error('Failed to create Tap checkout session');
+      toast.error(t('checkout.sessionFailed', { gateway: 'Tap' }));
     }
   };
 
@@ -380,7 +380,7 @@ export default function Checkout() {
       // — not here — so an abandoned/failed online payment keeps the cart intact.
       window.location.href = data.payment.sessionUrl;
     } else {
-      toast.error('Failed to create Tamara checkout session');
+      toast.error(t('checkout.sessionFailed', { gateway: 'Tamara' }));
     }
   };
 
@@ -428,7 +428,7 @@ export default function Checkout() {
 
     const loaded = await loadScript(scriptUrl);
     if (!loaded) {
-      toast.error('Failed to load Paytm checkout. Check your internet connection.');
+      toast.error(t('checkout.paytmLoadFailed'));
       setLoading(false);
       return;
     }
@@ -477,12 +477,12 @@ export default function Checkout() {
           })
           .catch(function (error) {
             console.error('Paytm init error:', error);
-            toast.error('Failed to initialize Paytm checkout');
+            toast.error(t('checkout.paytmInitFailed'));
             setLoading(false);
           });
       });
     } else {
-      toast.error('Paytm checkout not available');
+      toast.error(t('checkout.paytmUnavailable'));
       setLoading(false);
     }
   };
@@ -515,12 +515,12 @@ export default function Checkout() {
       } else if (method === 'tamara') {
         await handleTamaraPayment();
       } else {
-        toast.error(`${method} gateway is not configured yet. Please choose another method.`);
+        toast.error(t('checkout.gatewayNotConfigured', { method }));
         setLoading(false);
         return;
       }
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Failed to place order');
+      toast.error(error.response?.data?.message || t('checkout.orderFailed'));
     } finally {
       setLoading(false);
     }
@@ -607,7 +607,7 @@ export default function Checkout() {
                         required
                         className="h-9 rounded-md border border-input bg-background px-3 text-sm outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/40"
                       >
-                        <option value="" disabled>Select state</option>
+                        <option value="" disabled>{t('checkout.selectState')}</option>
                         {regionStates.map((s) => <option key={s} value={s}>{s}</option>)}
                       </select>
                     </div>
@@ -619,7 +619,7 @@ export default function Checkout() {
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div className="flex flex-col gap-2">
                       <Label htmlFor="pincode">{t('checkout.pincode', { defaultValue: 'PIN code' })}</Label>
-                      <Input id="pincode" name="pincode" value={form.pincode} onChange={handleChange} inputMode="numeric" placeholder="6-digit PIN" required />
+                      <Input id="pincode" name="pincode" value={form.pincode} onChange={handleChange} inputMode="numeric" placeholder={t('checkout.pinPlaceholder')} required />
                     </div>
                     <div className="flex flex-col gap-2">
                       <Label htmlFor="phone">{t('checkout.phone')}</Label>
@@ -731,7 +731,7 @@ export default function Checkout() {
                     <Badge className="w-fit">{couponApplied.code}</Badge>
                     <span className="mt-1 text-xs text-muted-foreground">{couponApplied.description}</span>
                   </div>
-                  <Button type="button" variant="ghost" size="icon-sm" onClick={handleRemoveCoupon} aria-label="Remove coupon">
+                  <Button type="button" variant="ghost" size="icon-sm" onClick={handleRemoveCoupon} aria-label={t('checkout.removeCoupon')}>
                     <X className="size-4" />
                   </Button>
                 </div>

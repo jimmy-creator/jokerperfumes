@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { X, ArrowLeft } from 'lucide-react';
 import api from '../../api/axios';
@@ -11,62 +12,18 @@ import api from '../../api/axios';
  * so the quiz keeps working when the store's categories are renamed.
  */
 
-const ARCHETYPES = {
-  bold:       { persona: 'The Ringmaster',    blurb: 'Bold, smoky, impossible to ignore.' },
-  fresh:      { persona: 'The Aerialist',     blurb: 'Bright, clean, effortless in the air.' },
-  warm:       { persona: 'The Sweetheart',    blurb: 'Warm, sweet, made to be close.' },
-  mysterious: { persona: 'The Fortune Teller', blurb: 'Dark, musky — a whispered secret.' },
-};
-
+// The four fixed archetypes (display text lives in i18n under `quiz.personas`).
 // Tie-break priority when two archetypes score equally.
 const PRIORITY = ['mysterious', 'bold', 'warm', 'fresh'];
 
+// Only the archetype (`a`) per option is logic; prompt/label text lives in i18n
+// under `quiz.questions.<index>` and is looked up by position at render time.
 const QUESTIONS = [
-  {
-    prompt: 'The room turns when you enter. What do they feel?',
-    options: [
-      { label: 'Power. I command it.', a: 'bold' },
-      { label: 'Ease. Like a cool breeze.', a: 'fresh' },
-      { label: 'Warmth. They want to stay close.', a: 'warm' },
-      { label: 'Intrigue. Who is that?', a: 'mysterious' },
-    ],
-  },
-  {
-    prompt: 'Your kind of night?',
-    options: [
-      { label: 'Front row at the show', a: 'bold' },
-      { label: 'Rooftop under an open sky', a: 'fresh' },
-      { label: 'Candlelit and close', a: 'warm' },
-      { label: 'After midnight, no plans', a: 'mysterious' },
-    ],
-  },
-  {
-    prompt: 'Where do you feel most yourself?',
-    options: [
-      { label: 'Desert sun and endless dunes', a: 'bold' },
-      { label: 'Ocean air at sunrise', a: 'fresh' },
-      { label: 'By the fire, wrapped in wool', a: 'warm' },
-      { label: 'A moonlit forest', a: 'mysterious' },
-    ],
-  },
-  {
-    prompt: 'Choose your element.',
-    options: [
-      { label: 'Fire', a: 'bold' },
-      { label: 'Air', a: 'fresh' },
-      { label: 'Earth', a: 'warm' },
-      { label: 'Water', a: 'mysterious' },
-    ],
-  },
-  {
-    prompt: 'Your signature should…',
-    options: [
-      { label: 'Roar. Fill the room.', a: 'bold' },
-      { label: 'Refresh. Light and clean.', a: 'fresh' },
-      { label: 'Comfort. Sweet and close.', a: 'warm' },
-      { label: 'Linger. A soft mystery.', a: 'mysterious' },
-    ],
-  },
+  { options: [{ a: 'bold' }, { a: 'fresh' }, { a: 'warm' }, { a: 'mysterious' }] },
+  { options: [{ a: 'bold' }, { a: 'fresh' }, { a: 'warm' }, { a: 'mysterious' }] },
+  { options: [{ a: 'bold' }, { a: 'fresh' }, { a: 'warm' }, { a: 'mysterious' }] },
+  { options: [{ a: 'bold' }, { a: 'fresh' }, { a: 'warm' }, { a: 'mysterious' }] },
+  { options: [{ a: 'bold' }, { a: 'fresh' }, { a: 'warm' }, { a: 'mysterious' }] },
 ];
 
 function scoreAnswers(answers) {
@@ -82,6 +39,7 @@ function scoreAnswers(answers) {
 }
 
 export default function ScentQuizModal({ open, onClose }) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [map, setMap] = useState({});
   const [step, setStep] = useState(0);
@@ -136,13 +94,12 @@ export default function ScentQuizModal({ open, onClose }) {
   if (!open) return null;
 
   const q = QUESTIONS[step];
-  const persona = result ? ARCHETYPES[result] : null;
 
   return (
     <div
       role="dialog"
       aria-modal="true"
-      aria-label="The Oracle's Tent scent quiz"
+      aria-label={t('quiz.tentAriaLabel')}
       className="fixed inset-0 z-[100] flex items-center justify-center bg-black/85 p-4 backdrop-blur-sm"
       onClick={onClose}
     >
@@ -163,7 +120,7 @@ export default function ScentQuizModal({ open, onClose }) {
         <button
           type="button"
           onClick={onClose}
-          aria-label="Close"
+          aria-label={t('quiz.close')}
           className="absolute right-3 top-3 z-10 flex size-9 items-center justify-center text-white/50 transition-colors hover:text-[color:var(--gold)]"
         >
           <X className="size-5" />
@@ -186,21 +143,21 @@ export default function ScentQuizModal({ open, onClose }) {
               className="text-[0.7rem] font-semibold uppercase tracking-[0.25em]"
               style={{ color: 'var(--copper)' }}
             >
-              The Oracle's Tent · {step + 1}/{QUESTIONS.length}
+              {t('quiz.progressLabel', { step: step + 1, total: QUESTIONS.length })}
             </p>
             <h2 className="mt-3 font-serif text-2xl uppercase leading-tight tracking-wide sm:text-3xl">
-              {q.prompt}
+              {t(`quiz.questions.${step}.prompt`)}
             </h2>
 
             <div className="mt-6 flex flex-col gap-3">
-              {q.options.map((opt) => (
+              {q.options.map((opt, i) => (
                 <button
                   key={opt.a}
                   type="button"
                   onClick={() => pick(opt.a)}
                   className="group flex items-center justify-between gap-3 border border-white/15 px-4 py-3.5 text-left transition-colors hover:border-[color:var(--gold)] hover:bg-white/5"
                 >
-                  <span className="font-fell text-base">{opt.label}</span>
+                  <span className="font-fell text-base">{t(`quiz.questions.${step}.options.${i}`)}</span>
                   <span
                     className="text-lg opacity-0 transition-opacity group-hover:opacity-100"
                     style={{ color: 'var(--gold)' }}
@@ -216,20 +173,20 @@ export default function ScentQuizModal({ open, onClose }) {
                 onClick={() => setStep(step - 1)}
                 className="mt-6 inline-flex items-center gap-1.5 text-xs uppercase tracking-widest text-white/50 transition-colors hover:text-white"
               >
-                <ArrowLeft className="size-3.5" /> Back
+                <ArrowLeft className="size-3.5" /> {t('quiz.back')}
               </button>
             )}
           </div>
         ) : (
           <div className="relative py-4 text-center">
             <p className="text-[0.7rem] font-semibold uppercase tracking-[0.25em]" style={{ color: 'var(--copper)' }}>
-              The cards have spoken
+              {t('quiz.cardsSpoken')}
             </p>
             <h2 className="mt-4 font-serif text-4xl uppercase leading-none tracking-wide sm:text-5xl">
-              {persona.persona}
+              {t(`quiz.personas.${result}.name`)}
             </h2>
             <p className="font-fell mx-auto mt-4 max-w-xs text-lg italic" style={{ color: 'var(--gold)' }}>
-              {persona.blurb}
+              {t(`quiz.personas.${result}.blurb`)}
             </p>
             <button
               type="button"
@@ -237,7 +194,7 @@ export default function ScentQuizModal({ open, onClose }) {
               className="mt-8 inline-flex items-center gap-2 bg-white px-8 py-3.5 font-serif text-sm uppercase tracking-[0.2em] text-black transition-colors hover:bg-[color:var(--gold)]"
               style={{ color: '#000' }}
             >
-              Reveal my scents →
+              {t('quiz.revealMyScents')} →
             </button>
           </div>
         )}

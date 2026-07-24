@@ -27,7 +27,7 @@ import {
 } from '@/components/ui/sheet';
 import { cn } from '@/lib/utils';
 
-const STORE_NAME = import.meta.env.VITE_STORE_NAME || 'Elegant Bayt';
+const STORE_NAME = import.meta.env.VITE_STORE_NAME || 'Joker Perfumes';
 
 // Shared style for the desktop top-nav links (uppercase, bold, spaced).
 const navLinkCls = 'font-serif text-base uppercase tracking-[0.15em] text-foreground transition-colors hover:text-[color:var(--copper)]';
@@ -206,7 +206,7 @@ export default function Navbar() {
         />
         <button
           type="submit"
-          aria-label="Search"
+          aria-label={t('common.search')}
           className="flex shrink-0 items-center justify-center bg-primary px-4 text-primary-foreground transition-colors hover:bg-primary/90"
         >
           <Search className="size-4" />
@@ -237,7 +237,7 @@ export default function Navbar() {
             className="block w-full border-t border-border px-3 py-2.5 text-center text-sm font-medium text-primary hover:bg-accent/60"
             onClick={handleSearch}
           >
-            View all results for &ldquo;{query}&rdquo;
+            {t('chrome.viewAllResults', { query })}
           </button>
         </div>
       )}
@@ -331,7 +331,7 @@ export default function Navbar() {
               size="icon"
               className={cn(showSearch && 'text-primary')}
               onClick={() => setShowSearch((s) => !s)}
-              aria-label="Search"
+              aria-label={t('common.search')}
               aria-expanded={showSearch}
             >
               <Search className="size-5" />
@@ -341,7 +341,7 @@ export default function Navbar() {
               variant="ghost"
               size="icon"
               className={cn(isAccount && 'text-primary')}
-              aria-label={user ? 'Account' : 'Sign in'}
+              aria-label={user ? t('common.account') : t('common.signIn')}
             >
               <Link to={user ? '/profile' : '/login'}>
                 <User className="size-5" />
@@ -352,7 +352,7 @@ export default function Navbar() {
               variant="ghost"
               size="icon"
               className={cn('relative', isCart && 'text-primary')}
-              aria-label="Cart"
+              aria-label={t('common.cart')}
             >
               <Link to="/cart" aria-current={isCart ? 'page' : undefined}>
                 <ShoppingBag className="size-5" />

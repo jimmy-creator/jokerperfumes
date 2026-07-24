@@ -14,14 +14,14 @@ function EnglishBody() {
       <section className="s2-static-section">
         <h2>2. About Us</h2>
         <p>
-          The website and the brand <strong>Elegant Bayt</strong> are operated by <strong>Elegant Bayt</strong>. We are an online store selling quality products to customers across Qatar.
+          The website and the brand <strong>Joker Perfumes</strong> are operated by <strong>Joker Perfumes</strong>. We are an online store selling quality products to customers across Saudi Arabia.
         </p>
       </section>
 
       <section className="s2-static-section">
         <h2>3. Products &amp; Pricing</h2>
         <ul>
-          <li>All prices are listed in Qatar Riyals (QAR) and are inclusive of VAT where applicable.</li>
+          <li>All prices are listed in Saudi Riyals (SAR) and are inclusive of VAT where applicable.</li>
           <li>Prices may change without prior notice. The price applicable to your order is the one shown at the time you place it.</li>
           <li>Product photography is illustrative; minor variation in colour and finish may occur between batches.</li>
           <li>We make every effort to display accurate stock, but errors may occasionally occur; we reserve the right to cancel and refund affected orders.</li>
@@ -41,7 +41,7 @@ function EnglishBody() {
       <section className="s2-static-section">
         <h2>5. Authenticity</h2>
         <p>
-          All branded products sold by Elegant Bayt are sourced through authorised channels and are 100% genuine. We do not deal in counterfeit, refurbished, or unauthorised parallel-imported goods.
+          All branded products sold by Joker Perfumes are sourced through authorised channels and are 100% genuine. We do not deal in counterfeit, refurbished, or unauthorised parallel-imported goods.
         </p>
       </section>
 
@@ -68,17 +68,17 @@ function EnglishBody() {
 
       <section className="s2-static-section">
         <h2>9. Intellectual Property</h2>
-        <p>All content on this website — including text, photography, logos, and design — is owned by Elegant Bayt or its licensors. Reproduction, redistribution, or commercial use without our written permission is prohibited. Third-party brand names and logos remain the property of their respective owners.</p>
+        <p>All content on this website — including text, photography, logos, and design — is owned by Joker Perfumes or its licensors. Reproduction, redistribution, or commercial use without our written permission is prohibited. Third-party brand names and logos remain the property of their respective owners.</p>
       </section>
 
       <section className="s2-static-section">
         <h2>10. Limitation of Liability</h2>
-        <p>To the fullest extent permitted by applicable law, Elegant Bayt shall not be liable for any indirect, incidental, or consequential loss arising from the use of our website or products. Our total liability for any direct loss is limited to the amount paid for the affected order.</p>
+        <p>To the fullest extent permitted by applicable law, Joker Perfumes shall not be liable for any indirect, incidental, or consequential loss arising from the use of our website or products. Our total liability for any direct loss is limited to the amount paid for the affected order.</p>
       </section>
 
       <section className="s2-static-section">
         <h2>11. Governing Law &amp; Jurisdiction</h2>
-        <p>These terms are governed by the laws of the State of Qatar. Any disputes arising out of or in connection with these terms or your use of our services shall be subject to the exclusive jurisdiction of the courts of Qatar.</p>
+        <p>These terms are governed by the laws of the Kingdom of Saudi Arabia. Any disputes arising out of or in connection with these terms or your use of our services shall be subject to the exclusive jurisdiction of the courts of Saudi Arabia.</p>
       </section>
 
       <section className="s2-static-section">
@@ -90,10 +90,10 @@ function EnglishBody() {
         <h2>13. Contact</h2>
         <p>For any questions regarding these terms or our services:</p>
         <p>
-          <strong>Elegant Bayt</strong><br />
-          📍 5C6J+JMG, Ar-Rayyan, Qatar<br />
-          📧 <a href="mailto:info@elegantbayt.com">info@elegantbayt.com</a><br />
-          📞 / WhatsApp: <a href="tel:+97470338065">+974 7033 8065</a>
+          <strong>Joker Perfumes</strong><br />
+          📍 Saudi Arabia<br />
+          📧 <a href="mailto:info@jokerperfumes.com">info@jokerperfumes.com</a><br />
+          📞 / WhatsApp: <a href="tel:+966500000000">+966 50 000 0000</a>
         </p>
       </section>
     </>
@@ -113,14 +113,14 @@ function ArabicBody() {
       <section className="s2-static-section">
         <h2>2. من نحن</h2>
         <p>
-          هذا الموقع وعلامة <strong>Elegant Bayt</strong> تديرهما <strong>Elegant Bayt</strong>. نحن متجر إلكتروني يبيع منتجات عالية الجودة لعملائنا في دولة قطر.
+          هذا الموقع وعلامة <strong>Joker Perfumes</strong> تديرهما <strong>Joker Perfumes</strong>. نحن متجر إلكتروني يبيع منتجات عالية الجودة لعملائنا في المملكة العربية السعودية.
         </p>
       </section>
 
       <section className="s2-static-section">
         <h2>3. المنتجات والأسعار</h2>
         <ul>
-          <li>جميع الأسعار بالريال القطري (QAR) وشاملة لضريبة القيمة المضافة حيثما انطبق.</li>
+          <li>جميع الأسعار بالريال السعودي (SAR) وشاملة لضريبة القيمة المضافة حيثما انطبق.</li>
           <li>قد تتغيّر الأسعار دون إشعار مسبق. السعر المطبَّق على طلبك هو السعر المعروض وقت تقديمه.</li>
           <li>صور المنتجات للتوضيح؛ وقد يحدث اختلاف بسيط في اللون أو اللمسة النهائية بين الدفعات.</li>
           <li>نبذل قصارى جهدنا لعرض المخزون بدقّة، لكن قد تحدث أخطاء في بعض الأحيان؛ ونحتفظ بالحق في إلغاء الطلبات المتأثّرة واسترداد المبالغ.</li>
@@ -140,7 +140,7 @@ function ArabicBody() {
       <section className="s2-static-section">
         <h2>5. الأصالة</h2>
         <p>
-          جميع المنتجات الموسومة بعلامات تجارية والتي يبيعها Elegant Bayt مصدرها قنوات معتمدة وأصلية 100%. لا نتعامل في منتجات مقلَّدة أو مُجدَّدة أو مستوردة بشكل غير رسمي.
+          جميع المنتجات الموسومة بعلامات تجارية والتي يبيعها Joker Perfumes مصدرها قنوات معتمدة وأصلية 100%. لا نتعامل في منتجات مقلَّدة أو مُجدَّدة أو مستوردة بشكل غير رسمي.
         </p>
       </section>
 
@@ -167,17 +167,17 @@ function ArabicBody() {
 
       <section className="s2-static-section">
         <h2>9. الملكية الفكرية</h2>
-        <p>جميع المحتويات على هذا الموقع — بما في ذلك النصوص والصور والشعارات والتصميم — مملوكة لـ Elegant Bayt أو الجهات المُرخِّصة لها. يُحظَر النسخ أو إعادة التوزيع أو الاستخدام التجاري دون إذن خطّي منّا. تبقى أسماء وشعارات العلامات التجارية لأطراف ثالثة ملكًا لأصحابها.</p>
+        <p>جميع المحتويات على هذا الموقع — بما في ذلك النصوص والصور والشعارات والتصميم — مملوكة لـ Joker Perfumes أو الجهات المُرخِّصة لها. يُحظَر النسخ أو إعادة التوزيع أو الاستخدام التجاري دون إذن خطّي منّا. تبقى أسماء وشعارات العلامات التجارية لأطراف ثالثة ملكًا لأصحابها.</p>
       </section>
 
       <section className="s2-static-section">
         <h2>10. تحديد المسؤولية</h2>
-        <p>إلى أقصى حد يسمح به القانون المعمول به، لن تكون Elegant Bayt مسؤولة عن أي خسائر غير مباشرة أو عرضية أو تبعية ناتجة عن استخدام موقعنا أو منتجاتنا. مسؤوليتنا الإجمالية عن أي خسارة مباشرة تقتصر على المبلغ المدفوع للطلب المتأثّر.</p>
+        <p>إلى أقصى حد يسمح به القانون المعمول به، لن تكون Joker Perfumes مسؤولة عن أي خسائر غير مباشرة أو عرضية أو تبعية ناتجة عن استخدام موقعنا أو منتجاتنا. مسؤوليتنا الإجمالية عن أي خسارة مباشرة تقتصر على المبلغ المدفوع للطلب المتأثّر.</p>
       </section>
 
       <section className="s2-static-section">
         <h2>11. القانون الحاكم والاختصاص القضائي</h2>
-        <p>تخضع هذه الشروط لقوانين دولة قطر. وتخضع أي نزاعات تنشأ عن هذه الشروط أو تتعلق بها أو باستخدامك لخدماتنا للاختصاص القضائي الحصري لمحاكم دولة قطر.</p>
+        <p>تخضع هذه الشروط لقوانين المملكة العربية السعودية. وتخضع أي نزاعات تنشأ عن هذه الشروط أو تتعلق بها أو باستخدامك لخدماتنا للاختصاص القضائي الحصري لمحاكم المملكة العربية السعودية.</p>
       </section>
 
       <section className="s2-static-section">
@@ -189,10 +189,10 @@ function ArabicBody() {
         <h2>13. التواصل</h2>
         <p>لأي استفسارات تتعلق بهذه الشروط أو خدماتنا:</p>
         <p>
-          <strong>Elegant Bayt</strong><br />
-          📍 5C6J+JMG، الريان، قطر<br />
-          📧 <a href="mailto:info@elegantbayt.com">info@elegantbayt.com</a><br />
-          📞 / واتساب: <a href="tel:+97470338065">+974 7033 8065</a>
+          <strong>Joker Perfumes</strong><br />
+          📍 المملكة العربية السعودية<br />
+          📧 <a href="mailto:info@jokerperfumes.com">info@jokerperfumes.com</a><br />
+          📞 / واتساب: <a href="tel:+966500000000">+966 50 000 0000</a>
         </p>
       </section>
     </>
@@ -206,8 +206,8 @@ export default function TermsOfService() {
     <StaticPage
       title="Terms of Service"
       titleAr="شروط الخدمة"
-      description="Terms and conditions for using the Elegant Bayt website and services."
-      descriptionAr="الشروط والأحكام لاستخدام موقع Elegant Bayt وخدماتنا."
+      description="Terms and conditions for using the Joker Perfumes website and services."
+      descriptionAr="الشروط والأحكام لاستخدام موقع Joker Perfumes وخدماتنا."
       regionNote
     >
       {isAr ? <ArabicBody /> : <EnglishBody />}

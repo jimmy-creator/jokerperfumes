@@ -23,7 +23,7 @@ import {
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 
-const STORE_NAME = import.meta.env.VITE_STORE_NAME || 'Elegant Bayt';
+const STORE_NAME = import.meta.env.VITE_STORE_NAME || 'Joker Perfumes';
 
 export default function Products() {
   const { t } = useTranslation();
@@ -82,7 +82,7 @@ export default function Products() {
     localStorage.setItem('product-view', mode);
   };
 
-  const title = search ? `"${search}"` : category || 'Everything';
+  const title = search ? `"${search}"` : category || t('products.everything');
 
   const CategoryFilter = ({ onPick }) => (
     <div className="flex flex-col gap-1">
@@ -122,14 +122,16 @@ export default function Products() {
     <div className="mx-auto max-w-7xl px-4 py-8 lg:px-8">
       <SEO
         title={search ? `${t('common.search')}: ${search}` : category || t('products.allProducts')}
-        description={`Shop ${category ? category + ' at' : 'all products at'} ${STORE_NAME}. Fast delivery and easy returns.`}
+        description={category
+          ? t('products.seoDescCategory', { category, store: STORE_NAME })
+          : t('products.seoDescAll', { store: STORE_NAME })}
       />
 
       {/* Header */}
       <div className="mb-6 flex flex-col gap-4 border-b border-border pb-6 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="mb-1 text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
-            {search ? 'Searching for' : 'Collection'}
+            {search ? t('products.searchingFor') : t('products.collection')}
           </p>
           <h1 className="font-serif text-3xl font-semibold italic tracking-tight text-foreground sm:text-4xl">
             {title}
@@ -155,7 +157,7 @@ export default function Products() {
               <SelectItem value="createdAt-DESC">{t('products.sortNewest')}</SelectItem>
               <SelectItem value="price-ASC">{t('products.sortPriceLow')}</SelectItem>
               <SelectItem value="price-DESC">{t('products.sortPriceHigh')}</SelectItem>
-              <SelectItem value="name-ASC">A–Z</SelectItem>
+              <SelectItem value="name-ASC">{t('products.sortNameAsc')}</SelectItem>
             </SelectContent>
           </Select>
 
@@ -165,7 +167,7 @@ export default function Products() {
               variant={viewMode === 'two-col' ? 'secondary' : 'ghost'}
               size="icon-sm"
               onClick={() => setView('two-col')}
-              aria-label="Two columns"
+              aria-label={t('common.twoColumns')}
             >
               <Grid2x2 className="size-4" />
             </Button>
@@ -174,7 +176,7 @@ export default function Products() {
               variant={viewMode === 'grid' ? 'secondary' : 'ghost'}
               size="icon-sm"
               onClick={() => setView('grid')}
-              aria-label="Grid"
+              aria-label={t('common.grid')}
             >
               <LayoutGrid className="size-4" />
             </Button>
@@ -220,7 +222,7 @@ export default function Products() {
             </div>
           ) : products.length === 0 ? (
             <div className="flex min-h-64 items-center justify-center rounded-lg border border-dashed border-border text-muted-foreground">
-              No products found.
+              {t('products.noResults')}
             </div>
           ) : (
             <>
@@ -243,7 +245,7 @@ export default function Products() {
                       size="icon"
                       onClick={() => updateFilter('page', String(page - 1))}
                       disabled={page === 1}
-                      aria-label="Previous page"
+                      aria-label={t('common.previousPage')}
                     >
                       <ChevronLeft className="size-4" />
                     </Button>
@@ -262,7 +264,7 @@ export default function Products() {
                       size="icon"
                       onClick={() => updateFilter('page', String(page + 1))}
                       disabled={page === totalPages}
-                      aria-label="Next page"
+                      aria-label={t('common.nextPage')}
                     >
                       <ChevronRight className="size-4" />
                     </Button>

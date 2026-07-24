@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { X, Sparkles, Ticket, Copy, Check } from 'lucide-react';
 import api from '../../api/axios';
@@ -26,6 +27,7 @@ const solvedSet = (claimed, guest) =>
 
 export default function PuzzleGameModal({ open, onClose }) {
   const { user } = useAuth();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [data, setData] = useState({ levels: [], claimed: [] });
   const [guest, setGuest] = useState([]);
@@ -74,7 +76,7 @@ export default function PuzzleGameModal({ open, onClose }) {
     try {
       const { data: r } = await api.post('/game/puzzle/attempt', { level, guess });
       if (!r.correct) {
-        setError('Not quite — read the clue again.');
+        setError(t('game.wrongGuess'));
         setBusy(false);
         return;
       }
@@ -90,7 +92,7 @@ export default function PuzzleGameModal({ open, onClose }) {
       }
       setPhase('result');
     } catch {
-      setError('Something went wrong. Try again.');
+      setError(t('game.errorGeneric'));
     }
     setBusy(false);
   };
@@ -109,7 +111,7 @@ export default function PuzzleGameModal({ open, onClose }) {
     <div
       role="dialog"
       aria-modal="true"
-      aria-label="The Joker's Riddle word game"
+      aria-label={t('game.puzzleAriaLabel')}
       className="fixed inset-0 z-[100] flex items-center justify-center bg-black/85 p-4 backdrop-blur-sm"
       onClick={onClose}
     >
@@ -127,7 +129,7 @@ export default function PuzzleGameModal({ open, onClose }) {
         </div>
 
         <button
-          type="button" onClick={onClose} aria-label="Close"
+          type="button" onClick={onClose} aria-label={t('game.close')}
           className="absolute right-3 top-3 z-10 flex size-9 items-center justify-center text-white/50 transition-colors hover:text-[color:var(--gold)]"
         >
           <X className="size-5" />
@@ -142,13 +144,13 @@ export default function PuzzleGameModal({ open, onClose }) {
         </div>
 
         <p className="text-[0.7rem] font-semibold uppercase tracking-[0.25em]" style={{ color: 'var(--copper)' }}>
-          The Joker's Riddle{phase !== 'done' && current ? ` · Riddle ${level}/3` : ''}
+          {t('game.title')}{phase !== 'done' && current ? ` · ${t('game.riddleCounter', { level })}` : ''}
         </p>
 
         {phase === 'play' && current && (
           <div className="relative mt-3">
             <h2 className="font-serif text-2xl uppercase leading-tight tracking-wide sm:text-3xl">
-              Unscramble for {current.discount}% off
+              {t('game.unscrambleFor', { discount: current.discount })}
             </h2>
             <p className="font-fell mt-3 text-lg italic" style={{ color: 'var(--gold)' }}>{current.clue}</p>
 
@@ -164,7 +166,7 @@ export default function PuzzleGameModal({ open, onClose }) {
                 autoFocus
                 value={guess}
                 onChange={(e) => { setGuess(e.target.value); setError(''); }}
-                placeholder={`${current.length} letters`}
+                placeholder={t('game.lettersPlaceholder', { count: current.length })}
                 maxLength={current.length + 2}
                 className="w-full border bg-transparent px-4 py-3 text-center font-serif text-xl uppercase tracking-[0.3em] text-white outline-none placeholder:tracking-normal placeholder:text-white/30"
                 style={{ borderColor: error ? 'var(--danger)' : 'rgba(255,255,255,0.25)' }}
@@ -174,7 +176,7 @@ export default function PuzzleGameModal({ open, onClose }) {
                 type="submit" disabled={busy || !guess.trim()}
                 className="mt-4 w-full bg-white px-8 py-3.5 font-serif text-sm uppercase tracking-[0.2em] text-black transition-colors hover:bg-[color:var(--gold)] disabled:opacity-40"
               >
-                {busy ? 'Reading the cards…' : 'Submit'}
+                {busy ? t('game.readingCards') : t('game.submit')}
               </button>
             </form>
           </div>
@@ -184,28 +186,28 @@ export default function PuzzleGameModal({ open, onClose }) {
           <div className="relative mt-3 text-center">
             <Sparkles className="mx-auto size-8" style={{ color: 'var(--gold)' }} />
             <h2 className="mt-3 font-serif text-3xl uppercase leading-none tracking-wide sm:text-4xl">
-              Solved — {result.discount}% off!
+              {t('game.solvedDiscount', { discount: result.discount })}
             </h2>
             {result.coupon ? (
               <>
-                <p className="font-fell mt-3 text-base text-white/70">Your reward is saved to your account:</p>
+                <p className="font-fell mt-3 text-base text-white/70">{t('game.rewardSaved')}</p>
                 <CouponCode code={result.coupon.code} />
-                <p className="mt-2 text-xs text-white/40">Use it at checkout before it expires.</p>
+                <p className="mt-2 text-xs text-white/40">{t('game.useAtCheckout')}</p>
               </>
             ) : (
               <>
                 <p className="font-fell mt-3 text-base text-white/70">
-                  Log in to claim your {result.discount}% off coupon — it's held for you.
+                  {t('game.loginToClaimDiscount', { discount: result.discount })}
                 </p>
                 <button onClick={goLogin}
                   className="mt-5 inline-flex items-center gap-2 bg-white px-7 py-3 font-serif text-sm uppercase tracking-[0.2em] text-black transition-colors hover:bg-[color:var(--gold)]">
-                  Log in to claim →
+                  {t('game.loginToClaim')} →
                 </button>
               </>
             )}
             <button onClick={advance}
               className="mt-6 block w-full text-xs uppercase tracking-widest text-white/50 transition-colors hover:text-white">
-              {[1, 2, 3].some((l) => !solvedSet(data.claimed, guest).has(l)) ? 'Next riddle →' : 'Finish'}
+              {[1, 2, 3].some((l) => !solvedSet(data.claimed, guest).has(l)) ? `${t('game.nextRiddle')} →` : t('game.finish')}
             </button>
           </div>
         )}
@@ -213,23 +215,23 @@ export default function PuzzleGameModal({ open, onClose }) {
         {phase === 'done' && (
           <div className="relative mt-3 text-center">
             <h2 className="mt-1 font-serif text-3xl uppercase leading-none tracking-wide sm:text-4xl">
-              All riddles solved
+              {t('game.allSolved')}
             </h2>
             {user ? (
               <div className="mt-5 flex flex-col gap-2">
-                <p className="font-fell text-base text-white/70">Your rewards — apply at checkout:</p>
+                <p className="font-fell text-base text-white/70">{t('game.rewardsApply')}</p>
                 {data.claimed.sort((a, b) => a.level - b.level).map((c) => (
-                  <CouponCode key={c.level} code={c.code} label={`${c.value}% off`} />
+                  <CouponCode key={c.level} code={c.code} label={t('game.percentOff', { value: c.value })} />
                 ))}
               </div>
             ) : (
               <>
                 <p className="font-fell mt-3 text-base text-white/70">
-                  Log in to claim up to 15% off — your coupons are waiting.
+                  {t('game.loginToClaimAll')}
                 </p>
                 <button onClick={goLogin}
                   className="mt-5 inline-flex items-center gap-2 bg-white px-7 py-3 font-serif text-sm uppercase tracking-[0.2em] text-black transition-colors hover:bg-[color:var(--gold)]">
-                  Log in to claim →
+                  {t('game.loginToClaim')} →
                 </button>
               </>
             )}
@@ -241,6 +243,7 @@ export default function PuzzleGameModal({ open, onClose }) {
 }
 
 function CouponCode({ code, label }) {
+  const { t } = useTranslation();
   const [copied, setCopied] = useState(false);
   const copy = () => {
     if (!navigator.clipboard) return;
@@ -257,10 +260,10 @@ function CouponCode({ code, label }) {
       </span>
       <span className="flex items-center gap-2">
         {label ? <span className="text-xs text-white/50">{label}</span> : null}
-        <button type="button" onClick={copy} aria-label="Copy code"
+        <button type="button" onClick={copy} aria-label={t('game.copyCode')}
           className="flex items-center gap-1 rounded-sm px-2 py-1 text-xs uppercase tracking-wider transition-colors hover:bg-white/10">
           {copied ? <Check className="size-3.5" /> : <Copy className="size-3.5" />}
-          {copied ? 'Copied' : 'Copy'}
+          {copied ? t('game.copied') : t('game.copy')}
         </button>
       </span>
     </div>

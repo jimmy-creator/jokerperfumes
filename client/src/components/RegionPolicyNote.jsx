@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { useRegion } from '../context/RegionContext';
 import { CURRENCY, formatPrice } from '../utils/currency';
 
@@ -6,17 +7,20 @@ import { CURRENCY, formatPrice } from '../utils/currency';
 // label/rate) so the shared policy structure reflects the active market. The
 // detailed legal text per region is authored separately.
 export default function RegionPolicyNote() {
+  const { t } = useTranslation();
   const { region } = useRegion();
   return (
     <div className="mb-6 rounded-lg border border-primary/20 bg-primary/5 p-4 text-sm">
       <p className="font-medium text-foreground">
-        {region.flag} These terms apply to orders shipped within <strong>{region.name}</strong>.
+        {t('region.policyAppliesTo', { flag: region.flag, name: region.name })}
       </p>
       <p className="mt-1 text-muted-foreground">
-        Prices and charges are shown in {CURRENCY}. Free shipping on orders above{' '}
-        {CURRENCY}{formatPrice(region.freeShippingAbove)}. Prices are inclusive of{' '}
-        {region.taxLabel} ({region.taxRate}%). Shopping from a different country?
-        Switch your region using the flag in the top-right.
+        {t('region.policyDetails', {
+          currency: CURRENCY,
+          amount: formatPrice(region.freeShippingAbove),
+          taxLabel: region.taxLabel,
+          taxRate: region.taxRate,
+        })}
       </p>
     </div>
   );

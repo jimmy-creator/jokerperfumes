@@ -1,4 +1,5 @@
 import { Truck } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 /**
  * Estimated-delivery widget shown on the product detail page.
@@ -28,6 +29,7 @@ export default function EstimatedDelivery({
   skipFriday = false,
   freeOverHint = '',
 }) {
+  const { t } = useTranslation();
   const isAr = typeof document !== 'undefined' && document.documentElement.lang === 'ar';
   const locale = isAr ? 'ar-KW' : 'en-GB';
 
@@ -36,7 +38,7 @@ export default function EstimatedDelivery({
   const to = addBusinessDays(now, maxDays, { skipFriday });
   const fmt = (d) => d.toLocaleDateString(locale, { weekday: 'short', day: 'numeric', month: 'short' });
 
-  const label = isAr ? 'استلامك المتوقع' : 'Get it by';
+  const label = t('delivery.getItBy');
   const between = isAr ? `${fmt(to)} – ${fmt(from)}` : `${fmt(from)} – ${fmt(to)}`;
 
   return (

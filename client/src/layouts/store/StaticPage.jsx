@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import SEO from '../../components/SEO';
 import RegionPolicyNote from '../../components/RegionPolicyNote';
 
-const STORE_NAME = import.meta.env.VITE_STORE_NAME || 'Elegant Bayt';
+const STORE_NAME = import.meta.env.VITE_STORE_NAME || 'Joker Perfumes';
 
 export default function StaticPage({ title, titleAr, description, descriptionAr, regionNote = false, children }) {
   const { i18n } = useTranslation();

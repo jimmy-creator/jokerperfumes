@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../api/axios';
 import toast from 'react-hot-toast';
+import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -15,6 +16,7 @@ import {
 } from '@/components/ui/card';
 
 export default function ForgotPassword() {
+  const { t } = useTranslation();
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
@@ -25,9 +27,9 @@ export default function ForgotPassword() {
     try {
       await api.post('/auth/forgot-password', { email });
       setSent(true);
-      toast.success('Reset link sent! Check your email.');
+      toast.success(t('auth.resetLinkSentToast'));
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Something went wrong');
+      toast.error(error.response?.data?.message || t('auth.somethingWentWrong'));
     } finally {
       setLoading(false);
     }
@@ -39,47 +41,47 @@ export default function ForgotPassword() {
         {sent ? (
           <>
             <CardHeader className="text-center">
-              <CardTitle className="font-serif text-2xl">Check your email</CardTitle>
+              <CardTitle className="font-serif text-2xl">{t('auth.checkEmailTitle')}</CardTitle>
               <CardDescription>
-                We&apos;ve sent a password reset link to <strong className="text-foreground">{email}</strong>.
-                Check your inbox and click the link to reset your password.
+                {t('auth.checkEmailDescPrefix')} <strong className="text-foreground">{email}</strong>.
+                {' '}{t('auth.checkEmailDescSuffix')}
               </CardDescription>
             </CardHeader>
             <CardContent className="text-center text-sm text-muted-foreground">
-              Didn&apos;t receive it? Check your spam folder or{' '}
+              {t('auth.didntReceive')}{' '}
               <button onClick={() => setSent(false)} className="font-medium text-primary hover:underline">
-                try again
+                {t('auth.tryAgain')}
               </button>
             </CardContent>
           </>
         ) : (
           <>
             <CardHeader className="text-center">
-              <CardTitle className="font-serif text-2xl">Forgot password</CardTitle>
-              <CardDescription>Enter your email and we&apos;ll send you a link to reset your password.</CardDescription>
+              <CardTitle className="font-serif text-2xl">{t('auth.forgotPasswordTitle')}</CardTitle>
+              <CardDescription>{t('auth.forgotPasswordSubtitle')}</CardDescription>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleSubmit} className="flex flex-col gap-4">
                 <div className="flex flex-col gap-2">
-                  <Label htmlFor="email">Email address</Label>
+                  <Label htmlFor="email">{t('auth.emailAddressLabel')}</Label>
                   <Input
                     id="email"
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
-                    placeholder="Enter your registered email"
+                    placeholder={t('auth.emailPlaceholder')}
                   />
                 </div>
                 <Button type="submit" className="w-full" disabled={loading}>
-                  {loading ? 'Sending…' : 'Send reset link'}
+                  {loading ? t('auth.sending') : t('auth.sendResetLink')}
                 </Button>
               </form>
             </CardContent>
           </>
         )}
         <CardFooter className="justify-center">
-          <Link to="/login" className="text-sm font-medium text-primary hover:underline">Back to login</Link>
+          <Link to="/login" className="text-sm font-medium text-primary hover:underline">{t('auth.backToLogin')}</Link>
         </CardFooter>
       </Card>
     </div>

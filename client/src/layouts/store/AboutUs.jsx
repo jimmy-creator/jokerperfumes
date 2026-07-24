@@ -4,9 +4,9 @@ import { ShoppingBag, Award, Truck, ShieldCheck, Headphones, RefreshCw, Mail, Ph
 import StaticPage from './StaticPage';
 
 const CONTACT_LINKS = (t) => [
-  { href: 'mailto:info@elegantbayt.com', Icon: Mail, title: t('contact.emailUs'), lines: ['info@elegantbayt.com'] },
-  { href: 'tel:+97470338065', Icon: Phone, title: t('contact.callUs'), lines: ['+974 7033 8065', '+974 5534 3471'] },
-  { href: 'https://wa.me/97470338065', Icon: MessageCircle, title: t('contact.whatsapp'), lines: [t('contact.whatsappLine')] },
+  { href: 'mailto:info@jokerperfumes.com', Icon: Mail, title: t('contact.emailUs'), lines: ['info@jokerperfumes.com'] },
+  { href: 'tel:+966500000000', Icon: Phone, title: t('contact.callUs'), lines: ['+966 50 000 0000'] },
+  { href: 'https://wa.me/966500000000', Icon: MessageCircle, title: t('contact.whatsapp'), lines: [t('contact.whatsappLine')] },
 ];
 
 function ContactCards() {
@@ -54,13 +54,13 @@ function EnglishBody() {
       <section className="s2-static-section">
         <h2>Who We Are</h2>
         <p>
-          Elegant Bayt is a Qatar-based home store built around a simple idea: a carefully chosen
-          range of high-quality plastic home appliances — storage boxes, laundry baskets, dustbins,
-          organizers, kitchenware and more — that bring convenience and elegance to everyday living.
+          Joker Perfumes is a Saudi Arabia-based fragrance house built around a simple idea: a
+          carefully chosen range of luxury oriental and niche fragrances — oud, attars, eau de
+          parfum and signature blends — crafted to leave a lasting impression.
         </p>
         <p>
-          We focus on the things that matter: durable, well-made products, honest pricing, fast
-          delivery across Qatar, and support that actually helps.
+          We focus on the things that matter: authentic, well-made fragrances, honest pricing, fast
+          delivery across Saudi Arabia, and support that actually helps.
         </p>
       </section>
 
@@ -109,13 +109,13 @@ function ArabicBody() {
       <section className="s2-static-section">
         <h2>من نحن</h2>
         <p>
-          Elegant Bayt متجر منزلي مقرّه قطر، قائم على فكرة بسيطة: تشكيلة مختارة بعناية من الأدوات
-          المنزلية البلاستيكية عالية الجودة — صناديق تخزين، سلال غسيل، سلات مهملات، منظّمات،
-          أدوات مطبخ وغيرها — تضيف الراحة والأناقة إلى حياتك اليومية.
+          Joker Perfumes بيت عطور مقرّه المملكة العربية السعودية، قائم على فكرة بسيطة: تشكيلة مختارة
+          بعناية من العطور الشرقية والفاخرة — العود والعطور الزيتية وماء العطر والمزائج المميّزة —
+          صُمّمت لتترك انطباعًا لا يُنسى.
         </p>
         <p>
-          نركّز على ما يهمّ فعلًا: منتجات متينة حسنة الصنع، وأسعار صادقة، وتوصيل سريع في جميع
-          أنحاء قطر، ودعم يساعدك حقًا.
+          نركّز على ما يهمّ فعلًا: عطور أصيلة حسنة الصنع، وأسعار صادقة، وتوصيل سريع في جميع
+          أنحاء المملكة العربية السعودية، ودعم يساعدك حقًا.
         </p>
       </section>
 
@@ -163,8 +163,8 @@ export default function AboutUs() {
     <StaticPage
       title="About Us"
       titleAr="من نحن"
-      description="Elegant Bayt — premium plastic home appliances designed for durability, functionality and style, delivered across Qatar."
-      descriptionAr="Elegant Bayt — أدوات منزلية بلاستيكية فاخرة مصمّمة للمتانة والعملية والأناقة، مع توصيل في جميع أنحاء قطر."
+      description="Joker Perfumes — luxury oriental and niche fragrances, oud, attars and eau de parfum, delivered across Saudi Arabia."
+      descriptionAr="Joker Perfumes — عطور شرقية وفاخرة، عود وعطور زيتية وماء عطر، مع توصيل في جميع أنحاء المملكة العربية السعودية."
     >
       {isAr ? <ArabicBody /> : <EnglishBody />}
     </StaticPage>

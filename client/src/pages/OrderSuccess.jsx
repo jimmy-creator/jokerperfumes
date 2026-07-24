@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation, Trans } from 'react-i18next';
 import { Link, useSearchParams } from 'react-router-dom';
 import { CheckCircle2, XCircle, Download } from 'lucide-react';
 import { useCart } from '../context/CartContext';
@@ -11,6 +12,7 @@ import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export default function OrderSuccess() {
+  const { t } = useTranslation();
   const [searchParams] = useSearchParams();
   const { clearCart } = useCart();
   const { user } = useAuth();
@@ -98,23 +100,23 @@ export default function OrderSuccess() {
         <CheckCircle2 className="mx-auto size-16 text-emerald-600" strokeWidth={1.5} />
       )}
       <h1 className="mt-5 font-serif text-3xl font-semibold tracking-tight">
-        {isFailed ? 'Payment failed' : 'Order confirmed!'}
+        {isFailed ? t('orderSuccess.titleFailed') : t('orderSuccess.titleSuccess')}
       </h1>
       <p className="mt-2 text-muted-foreground">
         {isFailed
-          ? 'Your payment could not be processed. No amount has been charged.'
-          : 'Thank you for your purchase. Your order has been placed successfully.'}
+          ? t('orderSuccess.descFailed')
+          : t('orderSuccess.descSuccess')}
       </p>
 
       {(order || orderNumber) && (
         <Card className="mt-8 text-left">
           <CardContent className="flex flex-col gap-3">
-            <Row label="Order number" value={order?.orderNumber || orderNumber} />
+            <Row label={t('orderSuccess.orderNumber')} value={order?.orderNumber || orderNumber} />
             {order && (
               <>
-                <Row label="Amount" value={`${CURRENCY}${formatPrice(order.totalAmount)}`} />
-                <Row label="Payment" value={order.paymentStatus} />
-                <Row label="Status" value={order.orderStatus} />
+                <Row label={t('orderSuccess.amount')} value={`${CURRENCY}${formatPrice(order.totalAmount)}`} />
+                <Row label={t('orderSuccess.payment')} value={order.paymentStatus} />
+                <Row label={t('orderSuccess.status')} value={order.orderStatus} />
               </>
             )}
           </CardContent>
@@ -123,7 +125,7 @@ export default function OrderSuccess() {
 
       {isGuest && !isFailed && guestEmail && (
         <p className="mt-4 text-sm text-muted-foreground">
-          A confirmation has been sent to <strong>{guestEmail}</strong>. Save your order number to track your order.
+          <Trans i18nKey="orderSuccess.confirmationSent" values={{ email: guestEmail }} components={{ strong: <strong /> }} />
         </p>
       )}
 
@@ -140,12 +142,12 @@ export default function OrderSuccess() {
               window.open(url, '_blank');
             }}
           >
-            <Download className="size-4" /> Download invoice
+            <Download className="size-4" /> {t('orderSuccess.downloadInvoice')}
           </Button>
         )}
-        {!isGuest && <Button asChild variant="outline"><Link to="/orders">View my orders</Link></Button>}
-        <Button asChild variant="outline"><Link to="/products">Continue shopping</Link></Button>
-        {isGuest && <Button asChild><Link to="/register">Create account</Link></Button>}
+        {!isGuest && <Button asChild variant="outline"><Link to="/orders">{t('orderSuccess.viewMyOrders')}</Link></Button>}
+        <Button asChild variant="outline"><Link to="/products">{t('orderSuccess.continueShopping')}</Link></Button>
+        {isGuest && <Button asChild><Link to="/register">{t('orderSuccess.createAccount')}</Link></Button>}
       </div>
     </div>
   );

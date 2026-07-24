@@ -3,6 +3,7 @@ import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import GoogleLoginButton from '../components/GoogleLoginButton';
 import toast from 'react-hot-toast';
+import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -17,6 +18,7 @@ import {
 
 export default function Register() {
   const { user, register } = useAuth();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [form, setForm] = useState({ name: '', email: '', password: '', confirmPassword: '' });
   const [loading, setLoading] = useState(false);
@@ -28,16 +30,16 @@ export default function Register() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (form.password !== form.confirmPassword) {
-      toast.error('Passwords do not match');
+      toast.error(t('auth.passwordsDoNotMatch'));
       return;
     }
     setLoading(true);
     try {
       await register(form.name, form.email, form.password);
-      toast.success('Account created!');
+      toast.success(t('auth.accountCreatedToast'));
       navigate('/');
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Registration failed');
+      toast.error(error.response?.data?.message || t('auth.registrationFailed'));
     } finally {
       setLoading(false);
     }
@@ -49,21 +51,21 @@ export default function Register() {
     <div className="mx-auto flex min-h-[70vh] w-full max-w-md flex-col justify-center px-4 py-12">
       <Card>
         <CardHeader className="text-center">
-          <CardTitle className="font-serif text-2xl">Create account</CardTitle>
-          <CardDescription>Join us to track orders and check out faster</CardDescription>
+          <CardTitle className="font-serif text-2xl">{t('auth.registerTitle')}</CardTitle>
+          <CardDescription>{t('auth.registerSubtitle')}</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
             <div className="flex flex-col gap-2">
-              <Label htmlFor="name">Full name</Label>
+              <Label htmlFor="name">{t('auth.fullNameLabel')}</Label>
               <Input id="name" autoComplete="name" value={form.name} onChange={set('name')} required />
             </div>
             <div className="flex flex-col gap-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">{t('auth.emailLabel')}</Label>
               <Input id="email" type="email" autoComplete="email" value={form.email} onChange={set('email')} required />
             </div>
             <div className="flex flex-col gap-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">{t('auth.passwordLabel')}</Label>
               <Input
                 id="password"
                 type="password"
@@ -75,7 +77,7 @@ export default function Register() {
               />
             </div>
             <div className="flex flex-col gap-2">
-              <Label htmlFor="confirmPassword">Confirm password</Label>
+              <Label htmlFor="confirmPassword">{t('auth.confirmPasswordLabel')}</Label>
               <Input
                 id="confirmPassword"
                 type="password"
@@ -86,16 +88,16 @@ export default function Register() {
               />
             </div>
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? 'Creating…' : 'Create account'}
+              {loading ? t('auth.creating') : t('auth.createAccountButton')}
             </Button>
           </form>
           <GoogleLoginButton />
         </CardContent>
         <CardFooter className="justify-center">
           <p className="text-sm text-muted-foreground">
-            Already have an account?{' '}
+            {t('auth.haveAccount')}{' '}
             <Link to="/login" className="font-medium text-primary hover:underline">
-              Login
+              {t('auth.loginLink')}
             </Link>
           </p>
         </CardFooter>

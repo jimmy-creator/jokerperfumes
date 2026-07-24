@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Check, ChevronDown } from 'lucide-react';
 import { useRegion } from '../context/RegionContext';
 import { useCart } from '../context/CartContext';
@@ -8,6 +9,7 @@ import { useCart } from '../context/CartContext';
 // policy details app-wide. The cart is cleared first (prices are region-specific)
 // and the page reloads so everything re-renders in the new region.
 export default function RegionSwitcher({ compact = true }) {
+  const { t } = useTranslation();
   const { region, regions, regionCode, changeRegion } = useRegion();
   const { cart, clearCart } = useCart();
   const [open, setOpen] = useState(false);
@@ -35,7 +37,7 @@ export default function RegionSwitcher({ compact = true }) {
         onClick={() => setOpen((o) => !o)}
         aria-haspopup="listbox"
         aria-expanded={open}
-        title="Change region"
+        title={t('region.changeRegion')}
         className="flex items-center gap-1.5 rounded-full border border-current/40 px-2.5 py-1.5 text-sm font-medium text-inherit opacity-85 transition-opacity hover:opacity-100"
       >
         <span className="text-base leading-none">{region.flag}</span>
@@ -48,7 +50,7 @@ export default function RegionSwitcher({ compact = true }) {
           role="listbox"
           className="absolute right-0 top-[calc(100%+0.4rem)] z-50 w-52 overflow-hidden rounded-xl border border-border bg-popover p-1 text-popover-foreground shadow-lg"
         >
-          <p className="px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Shopping in</p>
+          <p className="px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{t('region.shoppingIn')}</p>
           {Object.values(regions).map((r) => (
             <button
               key={r.code}

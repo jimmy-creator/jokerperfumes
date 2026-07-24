@@ -1,11 +1,13 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Search } from 'lucide-react';
 import api from '../api/axios';
 import ProductImage from './ProductImage';
 import { CURRENCY } from '../utils/currency';
 
-export default function SearchAutocomplete({ onSubmit, className = '', placeholder = 'Search for products...' }) {
+export default function SearchAutocomplete({ onSubmit, className = '', placeholder }) {
+  const { t } = useTranslation();
   const [query, setQuery] = useState('');
   const [suggestions, setSuggestions] = useState([]);
   const [showDropdown, setShowDropdown] = useState(false);
@@ -91,9 +93,9 @@ export default function SearchAutocomplete({ onSubmit, className = '', placehold
           onChange={(e) => setQuery(e.target.value)}
           onFocus={() => suggestions.length > 0 && setShowDropdown(true)}
           onKeyDown={handleKeyDown}
-          placeholder={placeholder}
+          placeholder={placeholder || t('chrome.searchProductsPlaceholder')}
         />
-        <button type="submit" aria-label="Search"><Search size={16} strokeWidth={1.5} /></button>
+        <button type="submit" aria-label={t('chrome.searchButton')}><Search size={16} strokeWidth={1.5} /></button>
       </form>
 
       {showDropdown && (
@@ -117,7 +119,7 @@ export default function SearchAutocomplete({ onSubmit, className = '', placehold
             </button>
           ))}
           <button className="search-ac-viewall" onClick={handleSubmit}>
-            View all results for "{query}"
+            {t('chrome.viewAllResults', { query })}
           </button>
         </div>
       )}

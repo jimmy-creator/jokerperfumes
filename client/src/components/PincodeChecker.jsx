@@ -1,8 +1,10 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { MapPin, Truck, Check, X } from 'lucide-react';
 import api from '../api/axios';
 
 export default function PincodeChecker() {
+  const { t } = useTranslation();
   const [pincode, setPincode] = useState('');
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -14,7 +16,7 @@ export default function PincodeChecker() {
       const { data } = await api.get(`/pincodes/check/${pincode.trim()}`);
       setResult(data);
     } catch {
-      setResult({ available: false, message: 'Unable to check delivery' });
+      setResult({ available: false, message: t('delivery.unableToCheck') });
     } finally {
       setLoading(false);
     }
@@ -28,12 +30,12 @@ export default function PincodeChecker() {
           type="text"
           value={pincode}
           onChange={(e) => { setPincode(e.target.value.replace(/\D/g, '').slice(0, 6)); setResult(null); }}
-          placeholder="Enter pincode"
+          placeholder={t('delivery.enterPincode')}
           maxLength={6}
           onKeyDown={(e) => e.key === 'Enter' && handleCheck()}
         />
         <button onClick={handleCheck} disabled={loading || pincode.length < 4}>
-          {loading ? '...' : 'Check'}
+          {loading ? '...' : t('delivery.check')}
         </button>
       </div>
 
@@ -54,7 +56,7 @@ export default function PincodeChecker() {
               {result.codAvailable && (
                 <div className="pincode-result-row sub">
                   <Check size={14} />
-                  <span>Cash on Delivery available</span>
+                  <span>{t('delivery.codAvailable')}</span>
                 </div>
               )}
             </>

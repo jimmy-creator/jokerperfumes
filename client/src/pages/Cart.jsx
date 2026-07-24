@@ -62,15 +62,15 @@ export default function Cart() {
 
                 <div className="mt-3 flex items-center gap-3">
                   <div className="flex items-center rounded-md border border-input">
-                    <Button variant="ghost" size="icon-sm" onClick={() => updateQuantity(item.cartKey, item.quantity - 1)} aria-label="Decrease">
+                    <Button variant="ghost" size="icon-sm" onClick={() => updateQuantity(item.cartKey, item.quantity - 1)} aria-label={t('common.decrease')}>
                       <Minus className="size-3.5" />
                     </Button>
                     <span className="w-8 text-center text-sm font-medium">{item.quantity}</span>
-                    <Button variant="ghost" size="icon-sm" onClick={() => updateQuantity(item.cartKey, item.quantity + 1)} aria-label="Increase">
+                    <Button variant="ghost" size="icon-sm" onClick={() => updateQuantity(item.cartKey, item.quantity + 1)} aria-label={t('common.increase')}>
                       <Plus className="size-3.5" />
                     </Button>
                   </div>
-                  <Button variant="ghost" size="icon-sm" className="text-muted-foreground hover:text-destructive" onClick={() => removeFromCart(item.cartKey)} aria-label="Remove">
+                  <Button variant="ghost" size="icon-sm" className="text-muted-foreground hover:text-destructive" onClick={() => removeFromCart(item.cartKey)} aria-label={t('cart.remove')}>
                     <Trash2 className="size-4" />
                   </Button>
                 </div>
@@ -92,11 +92,11 @@ export default function Cart() {
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">{t('cart.shipping')}</span>
-                <span className="text-muted-foreground">Calculated at checkout</span>
+                <span className="text-muted-foreground">{t('cart.calculatedAtCheckout')}</span>
               </div>
               <Separator />
               <div className="flex justify-between text-base font-semibold">
-                <span>Total</span>
+                <span>{t('cart.total')}</span>
                 <span><CurrencySymbol />{formatPrice(cartTotal)}</span>
               </div>
               <TamaraWidget amount={cartTotal} />

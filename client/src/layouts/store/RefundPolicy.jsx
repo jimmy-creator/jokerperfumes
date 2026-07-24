@@ -66,10 +66,10 @@ function EnglishBody() {
       <section className="s2-static-section">
         <h2>6. Contact</h2>
         <p>
-          <strong>Elegant Bayt</strong><br />
-          📍 5C6J+JMG, Ar-Rayyan, Qatar<br />
-          📧 <a href="mailto:info@elegantbayt.com">info@elegantbayt.com</a><br />
-          📞 / WhatsApp: <a href="tel:+97470338065">+974 7033 8065</a>
+          <strong>Joker Perfumes</strong><br />
+          📍 Saudi Arabia<br />
+          📧 <a href="mailto:info@jokerperfumes.com">info@jokerperfumes.com</a><br />
+          📞 / WhatsApp: <a href="tel:+966500000000">+966 50 000 0000</a>
         </p>
       </section>
     </>
@@ -141,10 +141,10 @@ function ArabicBody() {
       <section className="s2-static-section">
         <h2>6. التواصل</h2>
         <p>
-          <strong>Elegant Bayt</strong><br />
-          📍 5C6J+JMG، الريان، قطر<br />
-          📧 <a href="mailto:info@elegantbayt.com">info@elegantbayt.com</a><br />
-          📞 / واتساب: <a href="tel:+97470338065">+974 7033 8065</a>
+          <strong>Joker Perfumes</strong><br />
+          📍 المملكة العربية السعودية<br />
+          📧 <a href="mailto:info@jokerperfumes.com">info@jokerperfumes.com</a><br />
+          📞 / واتساب: <a href="tel:+966500000000">+966 50 000 0000</a>
         </p>
       </section>
     </>
@@ -158,8 +158,8 @@ export default function RefundPolicy() {
     <StaticPage
       title="Refund Policy"
       titleAr="سياسة استرداد المبالغ"
-      description="Elegant Bayt refund policy. Returns accepted within 14 days on unused items in original packaging."
-      descriptionAr="سياسة استرداد المبالغ لدى Elegant Bayt. نقبل الإرجاع خلال 14 يومًا للمنتجات غير المستعملة في تغليفها الأصلي."
+      description="Joker Perfumes refund policy. Returns accepted within 14 days on unused items in original packaging."
+      descriptionAr="سياسة استرداد المبالغ لدى Joker Perfumes. نقبل الإرجاع خلال 14 يومًا للمنتجات غير المستعملة في تغليفها الأصلي."
       regionNote
     >
       {isAr ? <ArabicBody /> : <EnglishBody />}

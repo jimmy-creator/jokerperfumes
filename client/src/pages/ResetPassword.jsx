@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import api from '../api/axios';
 import toast from 'react-hot-toast';
+import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -30,6 +31,7 @@ function AuthShell({ title, description, children, footer }) {
 }
 
 export default function ResetPassword() {
+  const { t } = useTranslation();
   const [searchParams] = useSearchParams();
   const token = searchParams.get('token');
   const email = searchParams.get('email');
@@ -41,9 +43,9 @@ export default function ResetPassword() {
 
   if (!token || !email) {
     return (
-      <AuthShell title="Invalid link" description="This password reset link is invalid or has expired.">
+      <AuthShell title={t('auth.invalidLinkTitle')} description={t('auth.invalidLinkDesc')}>
         <Button asChild className="w-full">
-          <Link to="/forgot-password">Request new link</Link>
+          <Link to="/forgot-password">{t('auth.requestNewLink')}</Link>
         </Button>
       </AuthShell>
     );
@@ -52,16 +54,16 @@ export default function ResetPassword() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (password !== confirmPassword) {
-      toast.error('Passwords do not match');
+      toast.error(t('auth.passwordsDoNotMatch'));
       return;
     }
     setLoading(true);
     try {
       await api.post('/auth/reset-password', { email, token, password });
       setDone(true);
-      toast.success('Password reset successful!');
+      toast.success(t('auth.passwordResetSuccessToast'));
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Reset failed');
+      toast.error(error.response?.data?.message || t('auth.resetFailed'));
     } finally {
       setLoading(false);
     }
@@ -69,9 +71,9 @@ export default function ResetPassword() {
 
   if (done) {
     return (
-      <AuthShell title="Password reset!" description="Your password has been updated successfully.">
+      <AuthShell title={t('auth.passwordResetDoneTitle')} description={t('auth.passwordResetDoneDesc')}>
         <Button asChild className="w-full">
-          <Link to="/login">Login now</Link>
+          <Link to="/login">{t('auth.loginNow')}</Link>
         </Button>
       </AuthShell>
     );
@@ -79,13 +81,13 @@ export default function ResetPassword() {
 
   return (
     <AuthShell
-      title="Set new password"
-      description="Enter your new password below."
-      footer={<Link to="/login" className="text-sm font-medium text-primary hover:underline">Back to login</Link>}
+      title={t('auth.setNewPasswordTitle')}
+      description={t('auth.setNewPasswordDesc')}
+      footer={<Link to="/login" className="text-sm font-medium text-primary hover:underline">{t('auth.backToLogin')}</Link>}
     >
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <div className="flex flex-col gap-2">
-          <Label htmlFor="password">New password</Label>
+          <Label htmlFor="password">{t('auth.newPasswordLabel')}</Label>
           <Input
             id="password"
             type="password"
@@ -93,11 +95,11 @@ export default function ResetPassword() {
             onChange={(e) => setPassword(e.target.value)}
             required
             minLength={8}
-            placeholder="Min 8 chars, upper + lower + number"
+            placeholder={t('auth.newPasswordPlaceholder')}
           />
         </div>
         <div className="flex flex-col gap-2">
-          <Label htmlFor="confirmPassword">Confirm password</Label>
+          <Label htmlFor="confirmPassword">{t('auth.confirmPasswordLabel')}</Label>
           <Input
             id="confirmPassword"
             type="password"
@@ -107,7 +109,7 @@ export default function ResetPassword() {
           />
         </div>
         <Button type="submit" className="w-full" disabled={loading}>
-          {loading ? 'Resetting…' : 'Reset password'}
+          {loading ? t('auth.resetting') : t('auth.resetPasswordButton')}
         </Button>
       </form>
     </AuthShell>

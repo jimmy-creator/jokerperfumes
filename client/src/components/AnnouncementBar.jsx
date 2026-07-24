@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import api from '../api/axios';
 
 // This store saves announcements as plain strings, but the cache key lives on
@@ -20,6 +21,7 @@ function normalise(value) {
 }
 
 export default function AnnouncementBar() {
+  const { t } = useTranslation();
   const [items, setItems] = useState(() => {
     try {
       return normalise(JSON.parse(localStorage.getItem('cached-announcements')));
@@ -62,7 +64,7 @@ export default function AnnouncementBar() {
         borderBottom: '3px solid var(--copper)',
       }}
       role="region"
-      aria-label="Announcements"
+      aria-label={t('chrome.announcements')}
     >
       <div
         className="mx-auto max-w-[1200px] px-4 font-serif text-xs uppercase tracking-[0.18em]"

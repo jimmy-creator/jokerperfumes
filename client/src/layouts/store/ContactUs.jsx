@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 
-const STORE_NAME = import.meta.env.VITE_STORE_NAME || 'Elegant Bayt';
+const STORE_NAME = import.meta.env.VITE_STORE_NAME || 'Joker Perfumes';
 
 export default function ContactUs() {
   const { t } = useTranslation();
@@ -17,10 +17,10 @@ export default function ContactUs() {
   const [loading, setLoading] = useState(false);
 
   const contactCards = [
-    { href: 'mailto:info@elegantbayt.com', Icon: Mail, title: t('contact.emailUs'), lines: ['info@elegantbayt.com'] },
-    { href: 'tel:+97470338065', Icon: Phone, title: t('contact.callUs'), lines: ['+974 7033 8065', '+974 5534 3471'] },
-    { href: 'https://wa.me/97470338065', Icon: MessageCircle, title: t('contact.whatsapp'), lines: [t('contact.whatsappLine')] },
-    { href: 'https://www.google.com/maps/search/?api=1&query=5C6J%2BJMG%20Ar-Rayyan%20Qatar', Icon: MapPin, title: t('contact.visitUs'), lines: ['5C6J+JMG, Ar-Rayyan, Qatar'] },
+    { href: 'mailto:info@jokerperfumes.com', Icon: Mail, title: t('contact.emailUs'), lines: ['info@jokerperfumes.com'] },
+    { href: 'tel:+966500000000', Icon: Phone, title: t('contact.callUs'), lines: ['+966 50 000 0000'] },
+    { href: 'https://wa.me/966500000000', Icon: MessageCircle, title: t('contact.whatsapp'), lines: [t('contact.whatsappLine')] },
+    { href: 'https://www.google.com/maps/search/?api=1&query=Saudi%20Arabia', Icon: MapPin, title: t('contact.visitUs'), lines: ['Saudi Arabia'] },
   ];
 
   const handleSubmit = async (e) => {

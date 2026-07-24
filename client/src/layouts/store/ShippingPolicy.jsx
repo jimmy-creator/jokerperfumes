@@ -9,7 +9,7 @@ function EnglishBody() {
       <section className="s2-static-section">
         <h2>Where We Deliver</h2>
         <p>
-          We deliver across Qatar. Within Doha we can usually arrange same-day or next-day delivery; other areas take a day or two longer.
+          We deliver across Saudi Arabia. Within Riyadh we can usually arrange same-day or next-day delivery; other areas take a day or two longer.
         </p>
       </section>
 
@@ -30,9 +30,9 @@ function EnglishBody() {
             </tr>
           </thead>
           <tbody>
-            <tr><td>Doha</td><td>Same day – 1 business day</td></tr>
-            <tr><td>Al Rayyan, Al Wakrah, Lusail, Umm Salal</td><td>1–2 business days</td></tr>
-            <tr><td>Al Khor, Al Daayen, Mesaieed, Al Shamal</td><td>2–3 business days</td></tr>
+            <tr><td>Riyadh</td><td>Same day – 1 business day</td></tr>
+            <tr><td>Jeddah, Makkah, Madinah, Dammam</td><td>1–2 business days</td></tr>
+            <tr><td>Other regions across Saudi Arabia</td><td>2–3 business days</td></tr>
           </tbody>
         </table>
       </section>
@@ -49,7 +49,7 @@ function EnglishBody() {
       <section className="s2-static-section">
         <h2>4. Click &amp; Collect</h2>
         <p>
-          Order online and pick up from our store in Ar-Rayyan, Qatar within 1–2 hours of dispatch confirmation, free of charge. You'll receive an SMS / email when it's ready.
+          Order online and pick up from our store in Saudi Arabia within 1–2 hours of dispatch confirmation, free of charge. You'll receive an SMS / email when it's ready.
         </p>
       </section>
 
@@ -77,15 +77,15 @@ function EnglishBody() {
       <section className="s2-static-section">
         <h2>8. International Shipping</h2>
         <p>
-          We currently ship within Qatar only. For GCC or international orders, drop us a line and we can arrange on a case-by-case basis.
+          We currently ship within Saudi Arabia only. For GCC or international orders, drop us a line and we can arrange on a case-by-case basis.
         </p>
       </section>
 
       <section className="s2-static-section">
         <h2>9. Contact</h2>
         <p>
-          📞 / WhatsApp: <a href="tel:+97470338065">+974 7033 8065</a><br />
-          📧 <a href="mailto:info@elegantbayt.com">info@elegantbayt.com</a>
+          📞 / WhatsApp: <a href="tel:+966500000000">+966 50 000 0000</a><br />
+          📧 <a href="mailto:info@jokerperfumes.com">info@jokerperfumes.com</a>
         </p>
       </section>
     </>
@@ -100,7 +100,7 @@ function ArabicBody() {
       <section className="s2-static-section">
         <h2>أين نوصِّل</h2>
         <p>
-          نقوم بالتوصيل في جميع أنحاء دولة قطر. داخل الدوحة يمكننا عادةً ترتيب التوصيل في نفس اليوم أو اليوم التالي؛ أما المناطق الأخرى فتستغرق يومًا أو يومين إضافيَّين.
+          نقوم بالتوصيل في جميع أنحاء المملكة العربية السعودية. داخل الرياض يمكننا عادةً ترتيب التوصيل في نفس اليوم أو اليوم التالي؛ أما المناطق الأخرى فتستغرق يومًا أو يومين إضافيَّين.
         </p>
       </section>
 
@@ -121,9 +121,9 @@ function ArabicBody() {
             </tr>
           </thead>
           <tbody>
-            <tr><td>الدوحة</td><td>نفس اليوم – يوم عمل واحد</td></tr>
-            <tr><td>الريان، الوكرة، لوسيل، أم صلال</td><td>1–2 يوم عمل</td></tr>
-            <tr><td>الخور، الظعاين، مسيعيد، الشمال</td><td>2–3 أيام عمل</td></tr>
+            <tr><td>الرياض</td><td>نفس اليوم – يوم عمل واحد</td></tr>
+            <tr><td>جدة، مكة المكرمة، المدينة المنورة، الدمام</td><td>1–2 يوم عمل</td></tr>
+            <tr><td>باقي مناطق المملكة العربية السعودية</td><td>2–3 أيام عمل</td></tr>
           </tbody>
         </table>
       </section>
@@ -140,7 +140,7 @@ function ArabicBody() {
       <section className="s2-static-section">
         <h2>4. الطلب والاستلام من المتجر</h2>
         <p>
-          اطلب عبر الإنترنت واستلم من متجرنا في الريان، قطر خلال 1–2 ساعة من تأكيد التجهيز، دون أي رسوم. ستصلك رسالة نصية / بريد إلكتروني عندما يكون الطلب جاهزًا.
+          اطلب عبر الإنترنت واستلم من متجرنا في المملكة العربية السعودية خلال 1–2 ساعة من تأكيد التجهيز، دون أي رسوم. ستصلك رسالة نصية / بريد إلكتروني عندما يكون الطلب جاهزًا.
         </p>
       </section>
 
@@ -168,15 +168,15 @@ function ArabicBody() {
       <section className="s2-static-section">
         <h2>8. الشحن الدولي</h2>
         <p>
-          نقوم حاليًا بالشحن داخل دولة قطر فقط. للطلبات الخليجية أو الدولية، يرجى التواصل معنا وسنرتّبها وفق كل حالة.
+          نقوم حاليًا بالشحن داخل المملكة العربية السعودية فقط. للطلبات الخليجية أو الدولية، يرجى التواصل معنا وسنرتّبها وفق كل حالة.
         </p>
       </section>
 
       <section className="s2-static-section">
         <h2>9. التواصل</h2>
         <p>
-          📞 / واتساب: <a href="tel:+97470338065">+974 7033 8065</a><br />
-          📧 <a href="mailto:info@elegantbayt.com">info@elegantbayt.com</a>
+          📞 / واتساب: <a href="tel:+966500000000">+966 50 000 0000</a><br />
+          📧 <a href="mailto:info@jokerperfumes.com">info@jokerperfumes.com</a>
         </p>
       </section>
     </>
@@ -190,8 +190,8 @@ export default function ShippingPolicy() {
     <StaticPage
       title="Shipping Policy"
       titleAr="سياسة الشحن"
-      description="Elegant Bayt delivery across Qatar. Free over a minimum order, fast delivery to most areas."
-      descriptionAr="توصيل Elegant Bayt في جميع أنحاء قطر. توصيل مجاني فوق الحد الأدنى للطلب، وتوصيل سريع لمعظم المناطق."
+      description="Joker Perfumes delivery across Saudi Arabia. Free over a minimum order, fast delivery to most areas."
+      descriptionAr="توصيل Joker Perfumes في جميع أنحاء المملكة العربية السعودية. توصيل مجاني فوق الحد الأدنى للطلب، وتوصيل سريع لمعظم المناطق."
       regionNote
     >
       {isAr ? <ArabicBody /> : <EnglishBody />}

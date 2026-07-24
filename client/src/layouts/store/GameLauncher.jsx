@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import toast from 'react-hot-toast';
 import { Ticket } from 'lucide-react';
 import api from '../../api/axios';
@@ -10,6 +11,7 @@ import PuzzleGameModal, { GUEST_KEY, readGuestSolved } from './PuzzleGameModal';
 // (now authenticated) so the coupons are minted to their account.
 export default function GameLauncher() {
   const { user } = useAuth();
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [enabled, setEnabled] = useState(false);
   const claimedFor = useRef(null);
@@ -39,7 +41,7 @@ export default function GameLauncher() {
       try { localStorage.removeItem(GUEST_KEY); } catch { /* ignore */ }
       if (won.length) {
         toast.success(
-          `🎟️ ${won.length} puzzle reward${won.length > 1 ? 's' : ''} claimed! Open The Joker's Riddle to see your codes.`,
+          t('game.rewardsClaimedToast', { count: won.length }),
           { duration: 6000 },
         );
       }
@@ -53,12 +55,12 @@ export default function GameLauncher() {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        aria-label="Play The Joker's Riddle and win a discount"
+        aria-label={t('game.launcherAriaLabel')}
         className="fixed bottom-5 left-5 z-50 flex items-center gap-2 rounded-full border px-4 py-3 text-sm font-semibold uppercase tracking-wider shadow-lg transition-transform hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
         style={{ backgroundColor: 'var(--bg-dark)', borderColor: 'var(--copper)', color: 'var(--gold)' }}
       >
         <Ticket className="size-5" />
-        <span className="hidden sm:inline">Win 15% off</span>
+        <span className="hidden sm:inline">{t('game.win15Off')}</span>
       </button>
 
       <PuzzleGameModal open={open} onClose={() => setOpen(false)} />

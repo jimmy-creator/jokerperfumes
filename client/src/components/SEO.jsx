@@ -1,7 +1,7 @@
 import { Helmet } from 'react-helmet-async';
 import { CURRENCY } from '../utils/currency';
 
-const SITE_NAME = import.meta.env.VITE_STORE_NAME || 'Elegant Bayt';
+const SITE_NAME = import.meta.env.VITE_STORE_NAME || 'Joker Perfumes';
 const DEFAULT_DESC = import.meta.env.VITE_STORE_DESC || `Shop the latest products at great prices. Free shipping on orders over ${CURRENCY}500.`;
 const SITE_URL = typeof window !== 'undefined' ? window.location.origin : (import.meta.env.VITE_SITE_URL || '');
 const OG_IMAGE = import.meta.env.VITE_OG_IMAGE || '/images/hero-banner.jpeg';

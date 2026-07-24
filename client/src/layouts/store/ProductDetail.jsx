@@ -100,9 +100,9 @@ export default function ProductDetail() {
   if (!product) {
     return (
       <div className="mx-auto max-w-7xl px-4 py-24 text-center lg:px-8">
-        <h2 className="font-serif text-4xl font-semibold text-foreground">This product no longer exists.</h2>
+        <h2 className="font-serif text-4xl font-semibold text-foreground">{t('product.doesNotExist')}</h2>
         <Button asChild className="mt-8">
-          <Link to="/products">Back to products</Link>
+          <Link to="/products">{t('product.backToProducts')}</Link>
         </Button>
       </div>
     );
@@ -159,15 +159,15 @@ export default function ProductDetail() {
         type="product"
         product={{ ...product, price: displayPrice, stock: displayStock }}
         breadcrumbs={[
-          { name: 'Home', url: '/' },
-          { name: 'Products', url: '/products' },
+          { name: t('common.home'), url: '/' },
+          { name: t('common.products'), url: '/products' },
           ...(product.category ? [{ name: product.category, url: `/products?category=${encodeURIComponent(product.category)}` }] : []),
           { name: product.name, url: `/product/${product.slug}` },
         ]}
       />
 
       <Link to="/products" className="mb-6 inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground">
-        <ArrowLeft className="size-4" /> Back to collection
+        <ArrowLeft className="size-4" /> {t('product.backToCollection')}
       </Link>
 
       <div className="grid gap-10 lg:grid-cols-2">
@@ -180,7 +180,7 @@ export default function ProductDetail() {
           inWishlist={isInWishlist(product.id)}
           onToggleWishlist={() => {
             toggleWishlist(product);
-            showToast(isInWishlist(product.id) ? 'Removed from wishlist' : 'Added to wishlist');
+            showToast(isInWishlist(product.id) ? t('wishlist.removed') : t('wishlist.added'));
           }}
         />
 
@@ -192,12 +192,12 @@ export default function ProductDetail() {
           <h1 className="mt-2 break-words font-serif text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
             {localizedName(product)}
           </h1>
-          {product.brand && <p className="mt-1 text-sm text-muted-foreground">by {product.brand}</p>}
+          {product.brand && <p className="mt-1 text-sm text-muted-foreground">{t('product.byBrand', { brand: product.brand })}</p>}
 
           <div className="mt-3 flex flex-wrap items-center gap-2 text-sm">
             <Stars value={Math.round(product.ratings || 0)} />
             <span className="font-medium">{product.ratings || '0.0'}</span>
-            <span className="text-muted-foreground">· {product.numReviews} review{product.numReviews !== 1 ? 's' : ''}</span>
+            <span className="text-muted-foreground">· {t('product.reviewCount', { count: product.numReviews })}</span>
           </div>
 
           <div className="mt-5 flex flex-wrap items-center gap-3">
@@ -205,7 +205,7 @@ export default function ProductDetail() {
             {product.comparePrice && (
               <span className="text-lg text-muted-foreground line-through"><CurrencySymbol />{formatPrice(product.comparePrice)}</span>
             )}
-            {discount > 0 && <Badge>Save {discount}%</Badge>}
+            {discount > 0 && <Badge>{t('product.savePercent', { discount })}</Badge>}
           </div>
 
           <TamaraWidget amount={displayPrice} className="mt-3" />
@@ -264,7 +264,7 @@ export default function ProductDetail() {
           )}
 
           <div className={cn('mt-6 text-sm font-medium', displayStock > 0 ? 'text-emerald-600' : 'text-destructive')}>
-            {displayStock > 0 ? `In stock · ${displayStock} available` : 'Out of stock'}
+            {displayStock > 0 ? t('product.inStockAvailable', { count: displayStock }) : t('common.outOfStock')}
           </div>
 
           {displayStock > 0 && <div className="mt-2"><EstimatedDelivery minDays={1} maxDays={3} skipFriday /></div>}
@@ -272,23 +272,23 @@ export default function ProductDetail() {
           {displayStock > 0 ? (
             <div className="mt-6 flex flex-wrap items-center gap-3">
               <div className="flex items-center rounded-md border border-input">
-                <Button type="button" variant="ghost" size="icon" onClick={() => setQuantity(Math.max(1, quantity - 1))} aria-label="Decrease">
+                <Button type="button" variant="ghost" size="icon" onClick={() => setQuantity(Math.max(1, quantity - 1))} aria-label={t('common.decrease')}>
                   <Minus className="size-4" />
                 </Button>
                 <span className="w-10 text-center text-sm font-medium">{quantity}</span>
-                <Button type="button" variant="ghost" size="icon" onClick={() => setQuantity(Math.min(displayStock, quantity + 1))} aria-label="Increase">
+                <Button type="button" variant="ghost" size="icon" onClick={() => setQuantity(Math.min(displayStock, quantity + 1))} aria-label={t('common.increase')}>
                   <Plus className="size-4" />
                 </Button>
               </div>
               <Button type="button" variant="outline" size="lg" onClick={handleAddToCart} className="gap-2">
-                <ShoppingBag className="size-4" /> Add to cart
+                <ShoppingBag className="size-4" /> {t('common.addToCart')}
               </Button>
               <Button type="button" size="lg" onClick={handleBuyNow} className="gap-2">
-                <Zap className="size-4" /> Buy now
+                <Zap className="size-4" /> {t('common.buyNow')}
               </Button>
             </div>
           ) : (
-            <Button type="button" size="lg" disabled className="mt-6 w-full sm:w-auto">Sold out</Button>
+            <Button type="button" size="lg" disabled className="mt-6 w-full sm:w-auto">{t('product.soldOut')}</Button>
           )}
 
           <div className="mt-6">
@@ -323,10 +323,10 @@ export default function ProductDetail() {
         <div className="fixed inset-x-0 bottom-0 z-30 flex items-center gap-2 border-t border-border bg-background/95 p-3 backdrop-blur lg:hidden">
           <span className="shrink-0 text-lg font-semibold"><CurrencySymbol />{formatPrice(displayPrice)}</span>
           <Button type="button" variant="outline" className="flex-1 gap-1.5" onClick={handleAddToCart}>
-            <ShoppingBag className="size-4" /> Add
+            <ShoppingBag className="size-4" /> {t('common.add')}
           </Button>
           <Button type="button" className="flex-1 gap-1.5" onClick={handleBuyNow}>
-            <Zap className="size-4" /> Buy now
+            <Zap className="size-4" /> {t('common.buyNow')}
           </Button>
         </div>
       )}
@@ -335,7 +335,7 @@ export default function ProductDetail() {
 
       {relatedProducts.length > 0 && (
         <section className="mt-16">
-          <h2 className="mb-6 font-serif text-2xl font-semibold tracking-tight">You may also love</h2>
+          <h2 className="mb-6 font-serif text-2xl font-semibold tracking-tight">{t('product.youMayAlsoLove')}</h2>
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
             {relatedProducts.slice(0, 4).map((p) => <ProductCard key={p.id} product={p} />)}
           </div>
@@ -344,7 +344,7 @@ export default function ProductDetail() {
 
       {viewed.filter((p) => p.id !== product.id).length > 0 && (
         <section className="mt-16 mb-20 lg:mb-0">
-          <h2 className="mb-6 font-serif text-2xl font-semibold tracking-tight">Recently viewed</h2>
+          <h2 className="mb-6 font-serif text-2xl font-semibold tracking-tight">{t('product.recentlyViewed')}</h2>
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
             {viewed.filter((p) => p.id !== product.id).slice(0, 4).map((p) => <ProductCard key={p.id} product={p} />)}
           </div>
@@ -355,6 +355,7 @@ export default function ProductDetail() {
 }
 
 function Gallery({ images, product, activeImage, setActiveImage, discount, inWishlist, onToggleWishlist }) {
+  const { t } = useTranslation();
   const touchStart = useRef(null);
   const touchDelta = useRef(0);
   const imgCount = images?.length || 0;
@@ -398,7 +399,7 @@ function Gallery({ images, product, activeImage, setActiveImage, discount, inWis
           size="icon"
           className="absolute right-3 top-3 rounded-full shadow-sm"
           onClick={onToggleWishlist}
-          aria-label="Toggle wishlist"
+          aria-label={t('common.toggleWishlist')}
         >
           <Heart className={cn('size-[18px]', inWishlist && 'fill-destructive text-destructive')} />
         </Button>
@@ -411,7 +412,7 @@ function Gallery({ images, product, activeImage, setActiveImage, discount, inWis
                 type="button"
                 onClick={() => setActiveImage(i)}
                 className={cn('h-1.5 rounded-full bg-foreground/30 transition-all', activeImage === i ? 'w-5 bg-foreground/80' : 'w-1.5')}
-                aria-label={`Image ${i + 1}`}
+                aria-label={t('common.imageIndex', { index: i + 1 })}
               />
             ))}
           </div>
@@ -440,6 +441,7 @@ function Gallery({ images, product, activeImage, setActiveImage, discount, inWis
 }
 
 function ReviewsSection({ productId, user }) {
+  const { t } = useTranslation();
   const [reviews, setReviews] = useState([]);
   const [breakdown, setBreakdown] = useState({ 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 });
   const [total, setTotal] = useState(0);
@@ -472,12 +474,12 @@ function ReviewsSection({ productId, user }) {
     setSubmitting(true);
     try {
       await api.post('/reviews', { productId, ...formData });
-      showToast('Review submitted');
+      showToast(t('product.reviewSubmitted'));
       setShowForm(false);
       setFormData({ rating: 5, title: '', comment: '' });
       fetchReviews();
     } catch (error) {
-      showToast(error.response?.data?.message || 'Failed to submit review', 'error');
+      showToast(error.response?.data?.message || t('product.reviewFailed'), 'error');
     } finally {
       setSubmitting(false);
     }
@@ -491,10 +493,10 @@ function ReviewsSection({ productId, user }) {
   return (
     <section className="mt-16 border-t border-border pt-10">
       <div className="mb-6 flex items-center justify-between gap-4">
-        <h2 className="font-serif text-2xl font-semibold tracking-tight">Ratings &amp; reviews</h2>
+        <h2 className="font-serif text-2xl font-semibold tracking-tight">{t('product.ratingsAndReviews')}</h2>
         {user && (
           <Button type="button" variant="outline" onClick={() => setShowForm(!showForm)}>
-            {showForm ? 'Cancel' : 'Write a review'}
+            {showForm ? t('common.cancel') : t('product.writeReview')}
           </Button>
         )}
       </div>
@@ -507,7 +509,7 @@ function ReviewsSection({ productId, user }) {
           </div>
           <div className="mt-2"><Stars value={avgFloat} size={18} /></div>
           <span className="mt-2 text-xs text-muted-foreground">
-            {total > 0 ? `Based on ${total} ${total === 1 ? 'review' : 'reviews'}` : 'No reviews yet'}
+            {total > 0 ? t('product.basedOnReviews', { count: total }) : t('product.noReviewsYet')}
           </span>
         </div>
         <div className="flex flex-col justify-center gap-2">
@@ -529,26 +531,26 @@ function ReviewsSection({ productId, user }) {
       {showForm && user && (
         <form className="mt-6 flex flex-col gap-4 rounded-lg border border-border p-6" onSubmit={handleSubmit}>
           <div>
-            <Label className="mb-2 block">Rating</Label>
+            <Label className="mb-2 block">{t('product.rating')}</Label>
             <div className="flex gap-1">
               {[1, 2, 3, 4, 5].map((s) => (
-                <button key={s} type="button" onClick={() => setFormData({ ...formData, rating: s })} aria-label={`${s} stars`}>
+                <button key={s} type="button" onClick={() => setFormData({ ...formData, rating: s })} aria-label={t('product.starsAria', { count: s })}>
                   <Star size={24} className={formData.rating >= s ? 'fill-amber-500 text-amber-500' : 'text-muted-foreground/40'} />
                 </button>
               ))}
             </div>
           </div>
           <div className="flex flex-col gap-2">
-            <Label htmlFor="review-title">Title (optional)</Label>
-            <Input id="review-title" value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} placeholder="Summarize your experience" />
+            <Label htmlFor="review-title">{t('product.reviewTitleLabel')}</Label>
+            <Input id="review-title" value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} placeholder={t('product.reviewTitlePlaceholder')} />
           </div>
           <div className="flex flex-col gap-2">
-            <Label htmlFor="review-comment">Your review</Label>
-            <Textarea id="review-comment" value={formData.comment} onChange={(e) => setFormData({ ...formData, comment: e.target.value })} rows={4} required placeholder="What did you think?" />
+            <Label htmlFor="review-comment">{t('product.reviewLabel')}</Label>
+            <Textarea id="review-comment" value={formData.comment} onChange={(e) => setFormData({ ...formData, comment: e.target.value })} rows={4} required placeholder={t('product.reviewPlaceholder')} />
           </div>
           <div className="flex gap-2">
-            <Button type="submit" disabled={submitting}>{submitting ? 'Submitting…' : 'Submit review'}</Button>
-            <Button type="button" variant="ghost" onClick={() => setShowForm(false)}>Cancel</Button>
+            <Button type="submit" disabled={submitting}>{submitting ? t('product.submitting') : t('product.submitReview')}</Button>
+            <Button type="button" variant="ghost" onClick={() => setShowForm(false)}>{t('common.cancel')}</Button>
           </div>
         </form>
       )}
@@ -556,13 +558,13 @@ function ReviewsSection({ productId, user }) {
       {reviews.length === 0 ? (
         <div className="mt-6 flex flex-col items-center gap-2 rounded-lg border border-dashed border-border py-12 text-center">
           <Star className="size-7 text-muted-foreground/50" />
-          <p className="font-medium">No reviews yet</p>
-          <p className="text-sm text-muted-foreground">Be the first to share your experience.</p>
+          <p className="font-medium">{t('product.noReviewsYet')}</p>
+          <p className="text-sm text-muted-foreground">{t('product.beFirstReview')}</p>
         </div>
       ) : (
         <div className="mt-6 flex flex-col gap-4">
           {reviews.map((review) => {
-            const name = (review.name || 'Anonymous').trim();
+            const name = (review.name || t('common.anonymous')).trim();
             const initial = name.charAt(0).toUpperCase() || '?';
             return (
               <article key={review.id} className="rounded-lg border border-border p-5">
@@ -576,7 +578,7 @@ function ReviewsSection({ productId, user }) {
                       {new Date(review.createdAt).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })}
                     </span>
                   </div>
-                  {review.verified && <Badge variant="secondary" className="ml-auto">Verified buyer</Badge>}
+                  {review.verified && <Badge variant="secondary" className="ml-auto">{t('product.verifiedBuyer')}</Badge>}
                 </header>
                 <div className="mt-3"><Stars value={review.rating} /></div>
                 {review.title && <h4 className="mt-2 font-medium">{review.title}</h4>}

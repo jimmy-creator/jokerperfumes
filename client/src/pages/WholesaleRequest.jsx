@@ -6,7 +6,7 @@ import api from '../api/axios';
 import { useAuth } from '../context/AuthContext';
 import SEO from '../components/SEO';
 
-const emptyAddress = { line1: '', line2: '', city: '', state: '', postalCode: '', country: 'Qatar' };
+const emptyAddress = { line1: '', line2: '', city: '', state: '', postalCode: '', country: 'Saudi Arabia' };
 
 export default function WholesaleRequest() {
   const { user, loading: authLoading } = useAuth();

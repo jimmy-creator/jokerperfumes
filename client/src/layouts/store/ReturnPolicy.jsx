@@ -68,10 +68,10 @@ function EnglishBody() {
       <section className="s2-static-section">
         <h2>7. Contact</h2>
         <p>
-          <strong>Elegant Bayt</strong><br />
-          📍 5C6J+JMG, Ar-Rayyan, Qatar<br />
-          📧 <a href="mailto:info@elegantbayt.com">info@elegantbayt.com</a><br />
-          📞 / WhatsApp: <a href="tel:+97470338065">+974 7033 8065</a>
+          <strong>Joker Perfumes</strong><br />
+          📍 Saudi Arabia<br />
+          📧 <a href="mailto:info@jokerperfumes.com">info@jokerperfumes.com</a><br />
+          📞 / WhatsApp: <a href="tel:+966500000000">+966 50 000 0000</a>
         </p>
       </section>
     </>
@@ -145,10 +145,10 @@ function ArabicBody() {
       <section className="s2-static-section">
         <h2>7. التواصل</h2>
         <p>
-          <strong>Elegant Bayt</strong><br />
-          📍 5C6J+JMG، الريان، قطر<br />
-          📧 <a href="mailto:info@elegantbayt.com">info@elegantbayt.com</a><br />
-          📞 / واتساب: <a href="tel:+97470338065">+974 7033 8065</a>
+          <strong>Joker Perfumes</strong><br />
+          📍 المملكة العربية السعودية<br />
+          📧 <a href="mailto:info@jokerperfumes.com">info@jokerperfumes.com</a><br />
+          📞 / واتساب: <a href="tel:+966500000000">+966 50 000 0000</a>
         </p>
       </section>
     </>
@@ -162,8 +162,8 @@ export default function ReturnPolicy() {
     <StaticPage
       title="Return Policy"
       titleAr="سياسة الإرجاع"
-      description="Elegant Bayt return policy. 14-day returns on unused items in original packaging, in-store and online."
-      descriptionAr="سياسة الإرجاع لدى Elegant Bayt. إرجاع خلال 14 يومًا للمنتجات غير المستعملة في تغليفها الأصلي في متجرنا وعبر الإنترنت."
+      description="Joker Perfumes return policy. 14-day returns on unused items in original packaging, in-store and online."
+      descriptionAr="سياسة الإرجاع لدى Joker Perfumes. إرجاع خلال 14 يومًا للمنتجات غير المستعملة في تغليفها الأصلي في متجرنا وعبر الإنترنت."
       regionNote
     >
       {isAr ? <ArabicBody /> : <EnglishBody />}
