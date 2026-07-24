@@ -77,16 +77,21 @@ function Hero({ banner }) {
 
   return (
     <section className="relative overflow-hidden border-y-[3px] border-foreground bg-foreground">
-      <picture>
-        {b.mobileImage && <source media="(max-width: 640px)" srcSet={b.mobileImage} />}
-        <img
-          src={b.image || '/images/joker/hero-circus.webp'}
-          alt=""
-          aria-hidden="true"
-          className="absolute inset-0 size-full object-cover"
-          fetchPriority="high"
-        />
-      </picture>
+      {/* Only render the hero image once a configured banner supplies one — no
+          hardcoded fallback artwork. Until it loads the section is a plain dark
+          band (bg-foreground), so nothing flashes on refresh. */}
+      {b.image && (
+        <picture>
+          {b.mobileImage && <source media="(max-width: 640px)" srcSet={b.mobileImage} />}
+          <img
+            src={b.image}
+            alt=""
+            aria-hidden="true"
+            className="absolute inset-0 size-full object-cover"
+            fetchPriority="high"
+          />
+        </picture>
+      )}
 
       <div className="relative mx-auto flex min-h-[520px] max-w-[1200px] flex-col items-center justify-center px-4 py-16 text-center sm:min-h-[600px] lg:min-h-[650px]">
         {b.eyebrow && (
@@ -579,16 +584,15 @@ export default function Home() {
   const [categories, setCategories] = useState([]);
   const [giftFrom, setGiftFrom] = useState(null);
   const [loading, setLoading] = useState(true);
-  // The first configured banner drives the hero; null falls back to the
-  // built-in circus artwork and default copy.
+  // The first configured banner drives the hero; until it loads (or if none is
+  // configured) the hero stays a plain dark band — no placeholder artwork or copy.
   const [heroBanner, setHeroBanner] = useState(null);
   const [reviews, setReviews] = useState([]);
 
   useEffect(() => {
-    // Every fetch below falls back to placeholder content when the API is
-    // unreachable or returns nothing, so a backend-less demo still renders a
-    // complete page. A successful response is always used as-is — including
-    // when a field is deliberately empty.
+    // No placeholder fallbacks: on error or an empty response each section
+    // renders nothing rather than demo content. Successful responses are used
+    // as-is, including when a field is deliberately empty.
     api.get('/reviews/top?limit=3')
       .then((res) => {
         setReviews(Array.isArray(res.data) ? res.data : []);
